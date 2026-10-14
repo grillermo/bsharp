@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openMenu, openProfilePanel, createProfile } from "./helpers";
+import { openProfilePanel } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());

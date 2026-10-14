@@ -16,6 +16,7 @@ import {
     setCurrentProfile, resetCatEmoji, registerGameCallbacks,
     showScreenPinningInfo, closeScreenPinningModal,
 } from './ui';
+import { initRewards, openPoster, closePoster, primeRewardAudio } from './reward';
 import { cleanSessionHistory } from './session_cleanup';
 import { startNextArrowFill, resetNextArrowFill } from './nextArrowAnimation';
 
@@ -46,6 +47,8 @@ w.download_state = downloadState;
 w.play_chord = playChord;
 w.show_screen_pinning_info = showScreenPinningInfo;
 w.close_screen_pinning_modal = closeScreenPinningModal;
+w.open_poster = openPoster;
+w.close_poster = closePoster;
 w.__bsharp_correct_color = () => _CORRECT_COLOR;
 w.__bsharp_start_next_arrow_fill = startNextArrowFill;
 w.__bsharp_reset_next_arrow_fill = resetNextArrowFill;
@@ -174,4 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
     updateStatsDisplay();
     cleanSessionHistory();
     initActiveState();
+    void initRewards();
+    // Capture phase so priming runs before the tapped control's own handler.
+    document.addEventListener('click', primeRewardAudio, { once: true, capture: true });
 });
