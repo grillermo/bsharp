@@ -13,7 +13,7 @@ test("play overlay visible on page load with arrow", async ({ page }) => {
   // Should contain arrow and text
   await expect(overlay.locator(".onboarding-arrow")).toBeVisible();
   await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "Click the play button to hear the sound",
+    "Toca el botón ▶ para escuchar",
   );
 });
 
@@ -36,7 +36,7 @@ test("guess overlay appears after audio finishes on first session", async ({
   // Wait for audio to finish and guess overlay to appear
   await expect(overlay).toBeVisible({ timeout: 5000 });
   await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "Guess the color",
+    "Adivina el color",
   );
   await expect(overlay).toHaveAttribute("data-step", "guess");
 });
@@ -57,7 +57,7 @@ test("correct guess shows success overlay on first identification", async ({
 
   await expect(overlay).toBeVisible();
   await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "Great job! Click the arrow to continue",
+    "¡Muy bien! Toca la flecha para seguir",
   );
   await expect(overlay).toHaveAttribute("data-step", "goNext");
 });
@@ -79,7 +79,7 @@ test("wrong guess shows retry overlay on first identification", async ({
 
   await expect(overlay).toBeVisible();
   await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "Click the arrow to try again",
+    "Toca la flecha para intentarlo otra vez",
   );
   await expect(overlay).toHaveAttribute("data-step", "goNext");
 });
@@ -155,7 +155,7 @@ test("guess overlay does NOT appear for profile with existing history", async ({
   await page.reload();
   await expect(overlay).toBeVisible();
   await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "Click the play button to hear the sound",
+    "Toca el botón ▶ para escuchar",
   );
 
   // Play and wait for audio to finish
@@ -181,14 +181,14 @@ test("overlay reappears when switching to a new profile", async ({ page }) => {
   // New profile should show the play overlay
   await expect(overlay).toBeVisible();
   await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "Click the play button to hear the sound",
+    "Toca el botón ▶ para escuchar",
   );
 
   // Play and wait — guess overlay should appear for new profile (no history)
   await page.locator("#play-button").click();
   await expect(overlay).toBeVisible({ timeout: 5000 });
   await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "Guess the color",
+    "Adivina el color",
   );
 });
 

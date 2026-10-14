@@ -15,8 +15,8 @@ function checkIsFirstSession(): boolean {
 }
 
 const STEP_CONFIG: Record<string, { text: string; arrow: boolean }> = {
-    play: { text: 'Click the play button to hear the sound', arrow: true },
-    guess: { text: 'Guess the color', arrow: false },
+    play: { text: 'Toca el botón ▶ para escuchar', arrow: true },
+    guess: { text: 'Adivina el color', arrow: false },
     goNext: { text: '', arrow: false },
 };
 
@@ -84,8 +84,8 @@ export function showOnboardingGoNextPrompt(isCorrect: boolean): void {
     hideOverlay();
     if (_isFirstIdentification) {
         const text = isCorrect
-            ? 'Great job! Click the arrow to continue'
-            : 'Click the arrow to try again';
+            ? '¡Muy bien! Toca la flecha para seguir'
+            : 'Toca la flecha para intentarlo otra vez';
         showOverlay('goNext', text);
         _isFirstIdentification = false;
     }

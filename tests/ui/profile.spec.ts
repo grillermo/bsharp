@@ -86,7 +86,7 @@ test("guest delete button is disabled", async ({ page }) => {
   await expect(page.locator("#delete-profile-button")).toBeDisabled();
 });
 
-test("deleting profile switches back to Guest", async ({ page }) => {
+test("deleting profile switches back to Elisa", async ({ page }) => {
   page.on("dialog", (dialog) => dialog.accept());
 
   await createProfile(page, "ToDelete", "fa-paw");
@@ -97,7 +97,7 @@ test("deleting profile switches back to Guest", async ({ page }) => {
   await page.locator("#delete-profile-button").click();
 
   // Should switch back to Guest
-  await expect(page.locator("#profile-text")).toHaveText("Guest");
+  await expect(page.locator("#profile-text")).toHaveText("Elisa");
 });
 
 test("hamburger is clickable with long profile name", async ({ page }) => {
@@ -124,7 +124,7 @@ test("hamburger is clickable with long profile name", async ({ page }) => {
 test("duplicate profile name shows alert", async ({ page }) => {
   let alertFired = false;
   page.on("dialog", async (dialog) => {
-    if (dialog.message().includes("already exists")) {
+    if (dialog.message().includes("Ya existe")) {
       alertFired = true;
     }
     await dialog.dismiss();

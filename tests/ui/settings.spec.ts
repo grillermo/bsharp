@@ -80,25 +80,25 @@ test("switching profiles applies that profile chord level", async ({
   await page.locator("#profile-switcher .switcher-add").click();
   await page.locator("#profile_name_setting").fill("Blue Level User");
   await page
-    .locator("input[name='profile_icon_selector'][value='fa-paw']")
+    .locator("input[name='profile_icon_selector'][value='fa-bolt']")
     .check();
   await page.locator("#add-user-button").click();
 
   // Change chord level to blue for the new profile
   await page.locator("#chord-selector").selectOption("blue");
 
-  // Switch back to Guest (Guest uses fa-user icon)
+  // Switch back to Guest (Elisa uses fa-paw icon)
   await openProfilePanel(page);
   await page
-    .locator("#profile-switcher .switcher-profile:has(.fa-user)")
+    .locator("#profile-switcher .switcher-profile:has(.fa-paw)")
     .click();
 
   // Guest should have default level (yellow)
   await expect(page.locator("#chord-selector")).toHaveValue("yellow");
 
-  // Switch back to Blue Level User (uses fa-paw icon)
+  // Switch back to Blue Level User (uses fa-bolt icon)
   await page
-    .locator("#profile-switcher .switcher-profile:has(.fa-paw)")
+    .locator("#profile-switcher .switcher-profile:has(.fa-bolt)")
     .click();
 
   await expect(page.locator("#chord-selector")).toHaveValue("blue");

@@ -579,11 +579,11 @@ export function addProfile(): void {
     const targetNumValid = validInt(newProfileValues.target_number);
 
     if (newProfileValues.icon === null || newProfileValues.name === '') {
-        alert('Must specify a profile name and icon.');
+        alert('Escribe un nombre y elige un ícono.');
     } else if (nameTaken) {
-        alert('A profile with the name ' + newProfileValues.name + ' already exists.');
+        alert('Ya existe un perfil llamado ' + newProfileValues.name + '.');
     } else if (!targetNumValid) {
-        alert('Target number must be a valid integer, got ' + newProfileValues.target_number);
+        alert('La meta debe ser un número entero; recibí: ' + newProfileValues.target_number);
     } else {
         const profile = newProfile(
             newProfileValues.name,
@@ -612,15 +612,15 @@ export function submitProfileChanges(): void {
     const currentProfile = STATE.profiles[profileValues.id!];
 
     if (currentProfile.name !== profileValues.name && isProfileNameTaken(profileValues.name)) {
-        alert('The name ' + profileValues.name + ' is taken, please choose another one.');
+        alert('El nombre ' + profileValues.name + ' ya está en uso; elige otro.');
         return;
     }
     if (profileValues.icon === null) {
-        alert('Must specify an icon!');
+        alert('¡Elige un ícono!');
         return;
     }
     if (!validInt(profileValues.target_number)) {
-        alert('Must specify a valid target number, got: ' + profileValues.target_number);
+        alert('La meta debe ser un número válido; recibí: ' + profileValues.target_number);
         return;
     }
 
@@ -651,11 +651,11 @@ export function deleteProfile(): void {
     const profileId = JSON.parse(profileContainer.dataset.id || 'null');
 
     if (profileId === GUEST_USER_ID) {
-        alert('Deleting the guest user is not allowed.');
+        alert('No se puede borrar el perfil principal.');
         return;
     }
 
-    if (confirm('Are you sure you want to delete the profile ' + STATE.profiles[profileId].name + '?')) {
+    if (confirm('¿Seguro que quieres borrar el perfil ' + STATE.profiles[profileId].name + '?')) {
         STATE.current_profile = GUEST_USER_ID;
         setCurrentProfile(STATE.profiles[GUEST_USER_ID]);
         delete STATE.profiles[profileId];
@@ -705,7 +705,7 @@ function clearStatsHistoryModal(): void {
 function appendEmptyStatsMessage(container: HTMLElement): void {
     const msg = document.createElement('div');
     msg.classList.add('stats-history-empty');
-    msg.textContent = 'No sessions recorded yet.';
+    msg.textContent = 'Todavía no hay sesiones.';
     container.appendChild(msg);
 }
 

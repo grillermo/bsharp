@@ -84,13 +84,13 @@ export function calculateNeutralLevel(percentage: number): number {
 
 export function getCatEmoji(level: number): string {
     const emojiLevels: Record<number, string> = {
-        0: '\u{1F63F}',
-        1: '\u{1F63E}',
-        2: '\u{1F431}',
-        3: '\u{1F63A}',
-        4: '\u{1F638}',
-        5: '\u{1F640}',
-        6: '\u{1F63B}',
+        0: '\u{1F436}',
+        1: '\u{1F436}',
+        2: '\u{1F436}',
+        3: '\u{1F415}',
+        4: '\u{1F60A}',
+        5: '\u{1F914}',
+        6: '\u{1F973}',
     };
     return emojiLevels[level];
 }

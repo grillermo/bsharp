@@ -129,7 +129,7 @@ export function loadState(): void {
 
     if (state === null) {
         const newProfiles: Record<number, Profile> = {};
-        newProfiles[GUEST_USER_ID] = newProfile('Guest', 'fa-user', GUEST_USER_ID);
+        newProfiles[GUEST_USER_ID] = newProfile('Elisa', 'fa-paw', GUEST_USER_ID);
         state = {
             profiles: newProfiles,
             current_chord: DEFAULT_CHORD,
@@ -139,7 +139,7 @@ export function loadState(): void {
         // Convert old-style state into profile-based state
         const newProfiles: Record<number, Profile> = {};
         newProfiles[LEGACY_USER_ID] = newProfile('Legacy User', 'fa-user', LEGACY_USER_ID);
-        newProfiles[GUEST_USER_ID] = newProfile('Guest', 'fa-user', GUEST_USER_ID);
+        newProfiles[GUEST_USER_ID] = newProfile('Elisa', 'fa-paw', GUEST_USER_ID);
         const updatedState: AppState = {
             profiles: newProfiles,
             current_chord: state.current_chord,

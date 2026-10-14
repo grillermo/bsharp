@@ -36,7 +36,7 @@ test("color scheme setting persists across profile switch", async ({
   // Switch back to Guest
   await openProfilePanel(page);
   await page
-    .locator("#profile-switcher .switcher-profile:has(.fa-user)")
+    .locator("#profile-switcher .switcher-profile:has(.fa-paw)")
     .click();
 
   // Guest should be dark

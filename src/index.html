@@ -1,14 +1,14 @@
 <!doctype html>
-<html>
+<html lang="es">
     <head>
-        <title>BSharp: Perfect Pitch Trainer</title>
+        <title>Elisa aprende música</title>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-        <meta http-equiv="Content-Language" content="en">
+        <meta http-equiv="Content-Language" content="es">
         <meta name="color-scheme" content="light dark">
-        <meta name="description" content="Perfect pitch trainer using Eguchi's Chord Identification Method. Practice identifying chords by color for children aged 2-6.">
+        <meta name="description" content="Elisa aprende a reconocer acordes por color.">
         <link rel="preload" href="static/fonts/forkawesome-webfont.woff2?v=1.2.0"
                             as="font" type="font/woff2" crossorigin="">
         <link rel="stylesheet" href="style.css">
@@ -105,10 +105,10 @@
         <div id="panel-area">
             <!-- Infobox -->
             <div class="infobox panel" id="i-infobox">
-                <p>This is an implementation of <a href="https://www.ganbar.us/documents/sakakibara_2012_chord_identification.pdf">Eguchi's Chord Identification method</a>. See also <a href="https://ichionkai.co.jp/english3.html">Ichionkai Music School</a>.</p>
-                <p><a href="https://youtu.be/kNfkm6PQC20">Here is a short video explaining how we use it</a>.</p>
-                <p>This is a method for teaching absolute pitch to children aged 2-6. Children should practice ~5x per day for 2-3 minutes (about 20-25 identifications). Chords are always identified with colors, and progress in the sequence <span onclick="trigger_easter_egg()">red</span> (CEG), yellow (CFA), blue (HDG), black (ACF), green (DGH), orange (EGC), purple (FAC), pink (GHD), brown (GCE).</p>
-                <p>Introduce the chords to the children one at a time, spacing out new chord introductions by at least 2 weeks each time. Do not introduce a new chord until the child can identify all presented chords with 100% accuracy.</p>
+                <p>Esta app usa el <a href="https://www.ganbar.us/documents/sakakibara_2012_chord_identification.pdf">método de identificación de acordes de Eguchi</a>. Ver también <a href="https://ichionkai.co.jp/english3.html">Ichionkai Music School</a>.</p>
+                <p><a href="https://youtu.be/kNfkm6PQC20">Video corto (en inglés) de cómo se usa</a>.</p>
+                <p>Es un método para enseñar oído absoluto a niños de 2 a 6 años. Practiquen unas 5 veces al día, 2–3 minutos cada vez (unas 20–25 respuestas). Los acordes siempre se identifican con colores, en este orden: <span onclick="trigger_easter_egg()">rojo</span> (Do Mi Sol), amarillo (Do Fa La), azul (Si Re Sol), negro (La Do Fa), verde (Re Sol Si), naranja (Mi Sol Do), morado (Fa La Do), rosa (Sol Si Re), café (Sol Do Mi).</p>
+                <p>Presenten los acordes uno por uno, con al menos 2 semanas entre cada acorde nuevo. No agreguen un acorde nuevo hasta que identifique todos los actuales con 100% de aciertos.</p>
             </div>
 
             <!-- Music player / Trainer -->
@@ -138,11 +138,11 @@
             <div class="profile-info-container panel" id="profile-info-container">
                 <div id="profile-switcher"></div>
                 <div class="entry-row">
-                    <label for="profile_name">Profile Name:</label>
+                    <label for="profile_name">Nombre:</label>
                     <input type="text" id="profile_name_setting" class="entry">
                 </div>
                 <div class="entry-row">
-                    <label for="profile_icon_selector">Icon:</label>
+                    <label for="profile_icon_selector">Ícono:</label>
                     <input type="radio" name="profile_icon_selector" value="fa-user" id="npis-user">
                     <label for="npis-user"><i class="fa fa-solid fa-user"></i></label>
                     <input type="radio" name="profile_icon_selector" value="fa-truck" id="npis-truck">
@@ -163,56 +163,56 @@
                     <label for="npis-taxi"><i class="fa fa-solid fa-taxi"></i></label>
                 </div>
                 <div class="entry-row">
-                    <label for="show_chord_name_mode">Show chord names:</label>
+                    <label for="show_chord_name_mode">Mostrar notas del acorde:</label>
                     <select class="selector" name="show_chord_name_mode" id="show-chord-name-mode-selector">
-                        <option value="always">Always</option>
-                        <option value="black_only">Black chords only</option>
-                        <option value="never">Never</option>
+                        <option value="always">Siempre</option>
+                        <option value="black_only">Solo acordes negros</option>
+                        <option value="never">Nunca</option>
                     </select>
                 </div>
                 <div class="entry-row">
-                    <label for="chord_reveal_mode">Reveal mode:</label>
+                    <label for="chord_reveal_mode">Mostrar notas:</label>
                     <select class="selector" name="chord_reveal_mode" id="chord-reveal-mode-selector">
-                        <option value="always">Always on</option>
-                        <option value="after_guess">Reveal after guess</option>
+                        <option value="always">Siempre</option>
+                        <option value="after_guess">Después de adivinar</option>
                     </select>
                 </div>
                 <div class="entry-row">
-                    <label for="chord_name_display_mode">Chord name display:</label>
+                    <label for="chord_name_display_mode">Formato de notas:</label>
                     <select class="selector" name="chord_name_display_mode" id="chord-name-display-mode-selector">
-                        <option value="shapes_and_letters">Shapes and Letters</option>
-                        <option value="shapes_only">Shapes only</option>
-                        <option value="letters_only">Letters only</option>
+                        <option value="shapes_and_letters">Figuras y letras</option>
+                        <option value="shapes_only">Solo figuras</option>
+                        <option value="letters_only">Solo letras</option>
                     </select>
                 </div>
                 <div class="entry-row">
-                    <label for="persist_reaction_face_setting">Persist Reaction Face:</label>
+                    <label for="persist_reaction_face_setting">Mantener carita:</label>
                     <input type="checkbox" id="persist_reaction_face_setting" class="entry">
                 </div>
                 <div class="entry-row">
-                    <label for="enable_onboarding_hints_setting">Enable Onboarding Hints:</label>
+                    <label for="enable_onboarding_hints_setting">Mostrar ayudas:</label>
                     <input type="checkbox" id="enable_onboarding_hints_setting" class="entry">
                 </div>
                 <div class="entry-row">
-                    <label for="target_number_setting">Target Number:</label>
+                    <label for="target_number_setting">Meta por sesión:</label>
                     <input type="number" id="target_number_setting" class="entry">
                 </div>
                 <div class="entry-row">
-                    <label for="color_scheme_setting">Color scheme:</label>
+                    <label for="color_scheme_setting">Tema:</label>
                     <select class="selector" name="color_scheme_setting" id="color-scheme-selector">
                         <option value="dark">Dark</option>
                         <option value="light">Light</option>
                     </select>
                 </div>
                 <div class="entry-row">
-                    <label for="chord_selection_mode_setting">Chord selection:</label>
+                    <label for="chord_selection_mode_setting">Elección de acordes:</label>
                     <select class="selector" name="chord_selection_mode_setting" id="chord-selection-mode-selector">
-                        <option value="random">Random</option>
-                        <option value="adaptive">Adaptive</option>
+                        <option value="random">Al azar</option>
+                        <option value="adaptive">Adaptativa</option>
                     </select>
                 </div>
                 <div class="entry-row">
-                    <label>Pin screen:</label>
+                    <label>Fijar pantalla:</label>
                     <button class="button settings-button" type="button" onclick="show_screen_pinning_info()">
                         <i class="fa fa-thumb-tack"></i> Info
                     </button>
@@ -221,9 +221,9 @@
                      Use "settings-button" for profile-edit buttons or "add-button" for profile-add buttons;
                      ui.ts adds .visible to the appropriate class when the panel opens. -->
                 <div class="button-container">
-                    <button class="button settings-button" id="delete-profile-button" onclick="delete_profile()">Delete Profile</button>
-                    <button class="button settings-button" id="submit-changes-button" onclick="submit_profile_changes()">Save Changes</button>
-                    <button class="button add-button" id="add-user-button" onclick="add_profile()">Add Profile</button>
+                    <button class="button settings-button" id="delete-profile-button" onclick="delete_profile()">Borrar perfil</button>
+                    <button class="button settings-button" id="submit-changes-button" onclick="submit_profile_changes()">Guardar</button>
+                    <button class="button add-button" id="add-user-button" onclick="add_profile()">Agregar perfil</button>
                 </div>
             </div>
         </div>
@@ -441,23 +441,23 @@
         </div>
         <div class="selectors">
             <select class="selector" name="chords" id="chord-selector" onchange="change_selector()">
-            <optgroup label="White chords">
-                <option value="red" hidden>Level 0: Red (C E G)</option>
-                <option value="yellow">Level 1: Yellow (C F A)</option>
-                <option value="blue">Level 2: Blue (B D G)</option>
-                <option value="black">Level 3: Black (A C F)</option>
-                <option value="green">Level 4: Green (D G B)</option>
-                <option value="orange">Level 5: Orange (E G C)</option>
-                <option value="purple">Level 6: Purple (F A C)</option>
-                <option value="pink">Level 7: Pink (G B D)</option>
-                <option value="brown">Level 8: Brown (G C E)</option>
+            <optgroup label="Acordes blancos">
+                <option value="red" hidden>Nivel 0: Rojo (Do Mi Sol)</option>
+                <option value="yellow">Nivel 1: Amarillo (Do Fa La)</option>
+                <option value="blue">Nivel 2: Azul (Si Re Sol)</option>
+                <option value="black">Nivel 3: Negro (La Do Fa)</option>
+                <option value="green">Nivel 4: Verde (Re Sol Si)</option>
+                <option value="orange">Nivel 5: Naranja (Mi Sol Do)</option>
+                <option value="purple">Nivel 6: Morado (Fa La Do)</option>
+                <option value="pink">Nivel 7: Rosa (Sol Si Re)</option>
+                <option value="brown">Nivel 8: Café (Sol Do Mi)</option>
             </optgroup>
-            <optgroup label="Black chords">
-                <option value="gray">Level 1: Gray (A C&#x266F; E)</option>
-                <option value="tan">Level 2: Tan (D F&#x266F; A)</option>
-                <option value="lightgreen">Level 3: Light Green (E G&#x266F; B)</option>
-                <option value="lightpurple">Level 4: Light Purple (B&#x266D; D F)</option>
-                <option value="skyblue">Level 5: Sky Blue (E&#x266D; G B&#x266D;)</option>
+            <optgroup label="Acordes negros">
+                <option value="gray">Nivel 1: Gris (La Do&#x266F; Mi)</option>
+                <option value="tan">Nivel 2: Beige (Re Fa&#x266F; La)</option>
+                <option value="lightgreen">Nivel 3: Verde claro (Mi Sol&#x266F; Si)</option>
+                <option value="lightpurple">Nivel 4: Lila (Si&#x266D; Re Fa)</option>
+                <option value="skyblue">Nivel 5: Celeste (Mi&#x266D; Sol Si&#x266D;)</option>
             </optgroup>
             </select>
             <select class="selector" name="instrument" id="instrument-selector" onchange="change_instrument_selector()">
@@ -524,18 +524,18 @@
 </div>
         <div class="modal-overlay" id="screen-pinning-modal">
         <div class="modal-content">
-            <p><strong>Screen Pinning</strong> locks the app on screen so children can't navigate away.</p>
-            <p><strong>Enable it:</strong></p>
+            <p><strong>Acceso guiado</strong> deja el iPad fijo en esta app para que Elisa no pueda salirse.</p>
+            <p><strong>Actívalo:</strong></p>
             <ol>
-                <li>Open <strong>Settings &gt; Security &gt; More security settings &gt; App Pinning</strong> (on Samsung: Security &gt; Other security settings &gt; Pin Windows)</li>
-                <li>Toggle it on. Enable "Ask for unlock to unpin" for extra security</li>
+                <li>Abre <strong>Ajustes &gt; Accesibilidad &gt; Acceso guiado</strong> y actívalo.</li>
+                <li>En <strong>Ajustes de código</strong>, define un código.</li>
             </ol>
-            <p><strong>Pin the app:</strong></p>
+            <p><strong>Úsalo:</strong></p>
             <ol>
-                <li>Open BSharp, then tap the Recent Apps button (or swipe up and hold)</li>
-                <li>Tap the app icon at the top of the preview, then tap <strong>Pin</strong></li>
+                <li>Abre la app y presiona tres veces el botón superior.</li>
+                <li>Toca <strong>Iniciar</strong>.</li>
             </ol>
-            <p><strong>Unpin:</strong> Swipe up and hold from the bottom (gesture nav) or hold Back + Overview together (button nav).</p>
+            <p><strong>Para salir:</strong> presiona tres veces el botón superior e ingresa el código.</p>
             <button class="button" type="button" onclick="close_screen_pinning_modal()">OK</button>
         </div>
     </div>
