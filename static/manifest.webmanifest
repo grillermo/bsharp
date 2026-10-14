@@ -1,0 +1,14 @@
+{
+  "name": "Elisa aprende música",
+  "short_name": "Elisa",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#8fd3fb",
+  "theme_color": "#8fd3fb",
+  "icons": [
+    { "src": "icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
