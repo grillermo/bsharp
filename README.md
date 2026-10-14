@@ -1,18 +1,10 @@
-# BSharp: Perfect Pitch Trainer
+# Elisa aprende música
 
-Young children can acquire absolute (perfect) pitch — but adults cannot. The window closes around age 6. BSharp helps develop this ability using Eguchi's chord identification method.
+A private, Spanish, Bluey-themed fork of [BSharp](https://github.com/paytonjjones/bsharp), the
+perfect-pitch chord trainer. Every 5 answers uncovers one tile of a Bluey poster.
 
-<p align="center">
-  <a href="https://play.google.com/store/apps/details?id=com.bsharp.app">
-    <img src="icon.svg" alt="BSharp" width="128">
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://play.google.com/store/apps/details?id=com.bsharp.app">
-    <strong>See it on the Play Store</strong>
-  </a>
-</p>
+To add a poster: put the image in `static/posters/`, add `{ "file": "...", "title": "..." }` to
+`static/posters/posters.json`, and run `make deploy`.
 
 ## How it Works
 

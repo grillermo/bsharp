@@ -1,4 +1,9 @@
-# BSharp: Perfect Pitch Trainer
+# Elisa aprende música (BSharp fork)
+
+Private fork of BSharp for Elisa (age 4–5): Spanish UI, bluey.tv look, a Bluey poster revealed one
+tile per 5 answers. Runs in Safari on an iPad mini at https://bluey.chiq.me (macmini, Caddy :8096).
+Spec: docs/superpowers/specs/2026-10-14-bluey-edition-design.md. Upstream: `upstream` remote.
+Bluey art and fonts are Ludo Studio / BBC property — never publish this to an app store.
 
 Rebuilt from [pganssle/cim](https://github.com/pganssle/cim) (Chord Identification Method Trainer). The original CIM source lives at `~/dev/cim`.
 
@@ -15,7 +20,7 @@ Rebuilt from [pganssle/cim](https://github.com/pganssle/cim) (Chord Identificati
 npm install          # First time only
 make build           # esbuild + sass + copy to dist/
 make check           # TypeScript type checking (tsc --noEmit)
-make android-deploy  # Build + copy dist/ to android assets
+make deploy          # Build + rsync dist/ to the macmini (bluey.chiq.me)
 make clean           # Remove dist/
 ```
 
@@ -35,8 +40,11 @@ src/
     game.ts          # Game flow: chord selection, flag tapping, play/next
     ui.ts            # DOM manipulation, modals, profile UI, settings
     session_cleanup.ts # Session history cleanup on startup
+    poster.ts        # Poster reveal rules (pure)
+    reward.ts        # Poster thumbnail, overlay, party
   scss/
     style.scss       # Entry: imports fork-awesome, theme, cim, note-shapes
+    _bluey.scss      # bluey.tv theme
     _variables.scss  # Color/theme variables
     _theme.scss      # Typography, base layout, theme toggle
     _cim.scss        # Main app styles (flags, controls, modals, colors)
@@ -46,6 +54,8 @@ src/
 static/
   chords/            # 42 pre-generated chord MP3s
   fonts/             # Fork Awesome font files (woff2, woff, ttf, eot, svg)
+  posters/           # posters.json + poster images
+  sounds/            # Chime and Spanish voice clips for tile reveal and completion
 android/             # Android WebView wrapper project
 ```
 
@@ -88,11 +98,7 @@ Tests exist to protect behavior, not to increase coverage or test count. Follow 
 ## Conventions
 
 - Use brief commit messages (one line, no body). Do not add Co-Authored-By trailers
-- After any code change, run `make android-deploy` to sync dist/ into the Android assets
-
-## Releases
-
-See [`dev/RELEASE.md`](RELEASE.md) for release instructions.
+- After a change Elisa should get, run `make deploy`.
 
 ## TODO
 

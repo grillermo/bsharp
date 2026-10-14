@@ -72,7 +72,7 @@ All changes are made in place in `~/c/bbsharp`.
 
 - **`src/ts/poster.ts`** — pure logic, no DOM. Owns the poster state and the rules:
   - `PosterState = { posterIndex: number, revealed: number[], triesTowardNext: number }`
-  - `recordTry(state, posterCount, rng) → { state, revealedTile: number | null, completed: boolean }`
+  - `recordTry(state, rng) → { state, revealedTile: number | null, completed: boolean }`
     adds one try; on the 5th it picks a random still-covered tile (0–107), resets the counter, and
     reports whether the poster is now complete.
   - `startNextPoster(state, posterCount)` advances `posterIndex` (wrapping) and clears `revealed`.
