@@ -1,9 +1,17 @@
-.PHONY: build serve check clean test test-unit test-ui test-integration test-screenshot test-screenshot-update test-android-touch android-deploy android-release icons generate-audio move-downloaded-chords move-downloaded-notes convert-audio-to-mp3 play-store-screenshots agents-setup
+.PHONY: build serve deploy check clean test test-unit test-ui test-integration test-screenshot test-screenshot-update test-android-touch android-deploy android-release icons generate-audio move-downloaded-chords move-downloaded-notes convert-audio-to-mp3 play-store-screenshots agents-setup
 
 build: dist/bsharp.js dist/style.css dist/index.html dist/static
 
 serve: build
 	npx http-server dist -p 8080 -c-1
+
+DEPLOY_HOST := macmini
+DEPLOY_DIR := c/elisa-www
+
+deploy:
+	rm -rf dist
+	$(MAKE) build
+	rsync -az --delete -e "ssh -o BatchMode=yes" dist/ $(DEPLOY_HOST):$(DEPLOY_DIR)/
 
 dist/bsharp.js: src/ts/*.ts
 	npx esbuild src/ts/main.ts --bundle --outfile=dist/bsharp.js --format=iife --target=es2020
