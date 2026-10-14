@@ -20,6 +20,17 @@ const STEP_CONFIG: Record<string, { text: string; arrow: boolean }> = {
     goNext: { text: '', arrow: false },
 };
 
+// The overlay is hidden until .visible is added, so measure after showing it.
+function pointArrowAtPlayButton(overlay: HTMLElement, arrow: HTMLElement): void {
+    const play = document.getElementById('play-button');
+    if (!play) return;
+    overlay.classList.add('visible');
+    const overlayBox = overlay.getBoundingClientRect();
+    const playBox = play.getBoundingClientRect();
+    arrow.style.alignSelf = 'flex-start';
+    arrow.style.marginLeft = `${playBox.left + playBox.width / 2 - overlayBox.left}px`;
+}
+
 function showOverlay(step: string, textOverride?: string): void {
     if (!getCurrentProfile().enable_onboarding_hints) return;
     const overlay = document.getElementById('onboarding-overlay');
@@ -35,6 +46,7 @@ function showOverlay(step: string, textOverride?: string): void {
         arrow.className = 'onboarding-arrow';
         arrow.textContent = '\u2191';
         overlay.appendChild(arrow);
+        pointArrowAtPlayButton(overlay, arrow);
     }
 
     const text = document.createElement('span');

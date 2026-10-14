@@ -9,6 +9,7 @@ export const POSTER_STATE_KEY = 'elisa_poster';
 const POSTERS_URL = 'static/posters/posters.json';
 const FLIP_DELAY_MS = 500;
 const FEEDBACK_MS = 1500;
+const REVEAL_DELAY_MS = 1200; // let the child see which flag was right before the poster covers it
 const CONFETTI_PIECES = 80;
 const CONFETTI_COLORS = ['#ffca3a', '#f86468', '#77e0c7', '#5a5a87', '#8fd3fb', '#ffffff'];
 
@@ -114,15 +115,18 @@ export function onAnswer(isCorrect: boolean): void {
     renderThumb();
     if (result.revealedTile === null) return;
 
-    if (result.completed) {
-        el('poster-overlay').classList.add('party');
-        showPoster('¡Lo lograste, Elisa! ¡Terminaste el póster!', result.revealedTile);
-        throwConfetti();
-        playSound('party-audio');
-    } else {
-        showPoster('¡Muy bien, Elisa!', result.revealedTile);
-        playSound('cheer-audio');
-    }
+    const { completed, revealedTile } = result;
+    setTimeout(() => {
+        if (completed) {
+            el('poster-overlay').classList.add('party');
+            showPoster('¡Lo lograste, Elisa! ¡Terminaste el póster!', revealedTile);
+            throwConfetti();
+            playSound('party-audio');
+        } else {
+            showPoster('¡Muy bien, Elisa!', revealedTile);
+            playSound('cheer-audio');
+        }
+    }, REVEAL_DELAY_MS);
 }
 
 export function openPoster(): void {

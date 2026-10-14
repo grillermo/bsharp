@@ -138,7 +138,7 @@ body.colorscheme-light a#reset-button,
     display: none;
 }
 
-#onboarding-overlay {
+body.colorscheme-light #onboarding-overlay {
     font-family: $headline;
     color: $bluey-ink;
 }

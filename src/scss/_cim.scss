@@ -192,38 +192,39 @@ div.flag-container {
     cursor: pointer;
 }
 
+// A hint strip between the controls row and the flags. It takes its own space so it
+// never covers a flag; on the play step its arrow points up at #play-button.
 #onboarding-overlay {
     display: none;
-    position: absolute;
-    inset: 0;
     z-index: 50;
     font-size: 1.6rem;
     font-weight: bold;
     text-align: center;
-    padding: 0 2rem;
+    padding: 0;
     pointer-events: none;
-    align-items: center;
-    justify-content: center;
     flex-direction: column;
-    border-radius: 8px;
+    align-items: center;
 
     &.visible {
         display: flex;
     }
 
+    .onboarding-text {
+        padding: 0 2rem;
+    }
+
     .onboarding-arrow {
-        font-size: 4rem;
+        font-size: 3rem;
         line-height: 1;
+        transform: translateX(-50%);
     }
 }
 
 body.colorscheme-dark #onboarding-overlay {
-    background: rgba(0, 0, 0, 0.45);
     color: white;
 }
 
 body.colorscheme-light #onboarding-overlay {
-    background: rgba(255, 255, 255, 0.6);
     color: black;
 }
 
