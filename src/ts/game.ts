@@ -19,6 +19,7 @@ let _SELECTED_ELEM: HTMLElement | null = null;
 let _CORRECT_ELEM: HTMLElement | null = null;
 let _CURRENT_AUDIO: [HTMLAudioElement, number] | null = null;
 let _AUDIO_PLAYED = false;
+let _QUESTION_STARTED = false;
 let _EMOJI_LOCK = false;
 let _CURRENT_COEFFICIENTS: number[] | null = null;
 let _TRAINER_PRELOADED = false;
@@ -51,6 +52,9 @@ function setPlayedAfter(delay: number): void {
 }
 
 function onAudioEnded(): void {
+    // Piano taps share the chord elements; only the question's own playback
+    // may mark the question as heard.
+    if (!_QUESTION_STARTED) return;
     _AUDIO_PLAYED = true;
     showOnboardingGuessPrompt();
 }
@@ -105,6 +109,7 @@ export function populateAudio(): void {
     const playButton = document.getElementById('play-button');
     if (playButton) playButton.classList.remove('deactivated');
     _AUDIO_PLAYED = false;
+    _QUESTION_STARTED = false;
 }
 
 export function playAudio(): void {
@@ -116,17 +121,22 @@ export function playAudio(): void {
     const [chord, duration] = _CURRENT_AUDIO;
     stopCurrentAudio();
     const safeDuration = isNaN(duration) ? 0.8 : duration;
+    _QUESTION_STARTED = true;
     setPlayedAfter(safeDuration * 0.8);
     chord.play();
 }
 
 export function selectFlagWrapper(wrapperElem: HTMLElement): void {
-    if (_SELECTED_ELEM !== null) return;
-    if (!_AUDIO_PLAYED) return;
-
     const chosenColor = wrapperElem.dataset.color;
     const elem = wrapperElem.querySelector(':scope > .flag') as HTMLElement | null;
     if (!chosenColor || !elem) return;
+
+    // Piano mode: every tap sounds its chord, answering or not.
+    stopCurrentAudio();
+    playChord(chosenColor);
+
+    if (_SELECTED_ELEM !== null) return;
+    if (!_AUDIO_PLAYED) return;
 
     const flagHolder = document.getElementById('flag-holder')!;
 
