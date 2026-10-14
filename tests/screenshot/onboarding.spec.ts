@@ -62,8 +62,6 @@ test("success overlay appearance", async ({ page }) => {
   await expect(overlay.locator(".onboarding-text")).toHaveText(
     "¡Muy bien! Toca la flecha para seguir",
   );
-  // Let the transient answer toast fade so it does not cover the hint.
-  await expect(page.locator("#answer-feedback")).not.toHaveClass(/visible/);
   await expect(page).toHaveScreenshot(`success-overlay-${name}.png`, { clip: await hintArea(page) });
 });
 
@@ -80,8 +78,6 @@ test("retry overlay appearance", async ({ page }) => {
   await expect(overlay.locator(".onboarding-text")).toHaveText(
     "Toca la flecha para intentarlo otra vez",
   );
-  // Let the transient answer toast fade so it does not cover the hint.
-  await expect(page.locator("#answer-feedback")).not.toHaveClass(/visible/);
   await expect(page).toHaveScreenshot(`retry-overlay-${name}.png`, { clip: await hintArea(page) });
 });
 });

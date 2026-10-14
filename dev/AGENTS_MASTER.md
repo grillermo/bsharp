@@ -1,7 +1,6 @@
 # Elisa aprende música (BSharp fork)
 
-Private fork of BSharp for Elisa (age 4–5): Spanish UI, bluey.tv look, a Bluey poster revealed one
-tile per 5 answers. Runs in Safari on an iPad mini at https://bluey.chiq.me (macmini, Caddy :8096).
+Private fork of BSharp for Elisa (age 4–5): Spanish UI, bluey.tv look. Runs in Safari on an iPad mini at https://bluey.chiq.me (macmini, Caddy :8096).
 Spec: docs/superpowers/specs/2026-10-14-bluey-edition-design.md. Upstream: `upstream` remote.
 Bluey art and fonts are Ludo Studio / BBC property — never publish this to an app store.
 
@@ -41,8 +40,6 @@ src/
     game.ts          # Game flow: chord selection, flag tapping, play/next
     ui.ts            # DOM manipulation, modals, profile UI, settings
     session_cleanup.ts # Session history cleanup on startup
-    poster.ts        # Poster reveal rules (pure)
-    reward.ts        # Poster thumbnail, overlay, party
   scss/
     style.scss       # Entry: imports fork-awesome, theme, cim, note-shapes
     _bluey.scss      # bluey.tv theme
@@ -55,8 +52,6 @@ src/
 static/
   chords/            # 42 pre-generated chord MP3s
   fonts/             # Fork Awesome font files (woff2, woff, ttf, eot, svg)
-  posters/           # posters.json + poster images
-  sounds/            # Chime and Spanish voice clips for tile reveal and completion
 android/             # Android WebView wrapper project
 ```
 

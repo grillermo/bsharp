@@ -9,7 +9,6 @@ import {
 import { getCurrentCoefficients, updateStartTimeIfNeeded, updateStats, normalizeStatsObject } from './stats';
 import { getAudioFiles, audioFileElem, playChordFiles, preloadAudio } from './audio';
 import { populateFlags, updateStatsDisplay, resetCatEmoji, setCatEmoji, setChordDisplayMode, populateProfileUiElements } from './ui';
-import { onAnswer } from './reward';
 import { dismissOnboardingStep, showOnboardingGuessPrompt, showOnboardingGoNextPrompt, showOnboardingPlayPrompt } from './onboarding';
 
 let _COLORS: string[] | null = null;
@@ -146,7 +145,6 @@ export function selectFlagWrapper(wrapperElem: HTMLElement): void {
     updateStatsDisplay();
 
     const isCorrect = chosenColor === _CORRECT_COLOR;
-    onAnswer(isCorrect);
     if (isCorrect) {
         elem.classList.add('flag-correct');
         setCatEmoji(6);

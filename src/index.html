@@ -457,16 +457,6 @@
             <div class="flag-spacer"></div>
         </div>
         <div class="stats controls" id="stats-container">
-            <button type="button" id="poster-thumb" class="poster-thumb" onclick="open_poster()" aria-label="Ver el póster">
-                <div class="poster-frame">
-                    <img id="poster-thumb-img" alt="">
-                    <div id="poster-thumb-tiles" class="poster-tiles"></div>
-                </div>
-                <svg class="progress-ring" viewBox="0 0 36 36" aria-hidden="true">
-                    <circle class="ring-bg" cx="18" cy="18" r="16" pathLength="100"></circle>
-                    <circle id="progress-ring-fill" class="ring-fill" cx="18" cy="18" r="16" pathLength="100"></circle>
-                </svg>
-            </button>
             <div class="emoji-container">
                 <span id="reaction-emoji"></span>
             </div>
@@ -567,19 +557,6 @@
         </div>
     </div>
 </div>
-    <div id="answer-feedback" class="answer-feedback" aria-live="polite"></div>
-    <div id="poster-overlay" class="poster-overlay" onclick="close_poster()">
-        <div class="poster-card">
-            <p id="poster-message" class="poster-message"></p>
-            <div class="poster-frame">
-                <img id="poster-img" alt="">
-                <div id="poster-tiles" class="poster-tiles"></div>
-            </div>
-        </div>
-        <div id="confetti" class="confetti"></div>
-    </div>
-    <audio id="cheer-audio" src="static/sounds/muy-bien.mp3" preload="auto"></audio>
-    <audio id="party-audio" src="static/sounds/poster-completo.mp3" preload="auto"></audio>
     <script src="bsharp.js"></script>
     </body>
 </html>

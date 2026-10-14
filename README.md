@@ -1,10 +1,7 @@
 # Elisa aprende música
 
 A private, Spanish, Bluey-themed fork of [BSharp](https://github.com/paytonjjones/bsharp), the
-perfect-pitch chord trainer. Every 5 answers uncovers one tile of a Bluey poster.
-
-To add a poster: put the image in `static/posters/`, add `{ "file": "...", "title": "..." }` to
-`static/posters/posters.json`, and run `make deploy`.
+perfect-pitch chord trainer.
 
 ## How it Works
 
