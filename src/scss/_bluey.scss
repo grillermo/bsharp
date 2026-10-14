@@ -1,5 +1,7 @@
 // Elisa aprende música: bluey.tv look. Imported last so it wins over _theme/_cim.
 
+@use "sass:color";
+
 @font-face {
     font-family: "hello";
     src: url("static/fonts/hello-headline.woff2") format("woff2");
@@ -36,7 +38,7 @@ body.colorscheme-light {
         radial-gradient(ellipse 22% 6% at 18% 9%, #fff 60%, transparent 62%),
         radial-gradient(ellipse 18% 5% at 80% 18%, #fff 60%, transparent 62%),
         radial-gradient(ellipse 14% 4% at 55% 4%, #fff 60%, transparent 62%),
-        linear-gradient(to bottom, $bluey-sky-top 0%, $bluey-sky-bottom 78%, $bluey-grass 78%, darken($bluey-grass, 12%) 100%);
+        linear-gradient(to bottom, $bluey-sky-top 0%, $bluey-sky-bottom 78%, $bluey-grass 78%, color.adjust($bluey-grass, $lightness: -12%) 100%);
     background-attachment: fixed;
 }
 
