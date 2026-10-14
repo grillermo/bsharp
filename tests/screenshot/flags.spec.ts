@@ -107,6 +107,10 @@ test("nav bar icons are consistently sized and aligned", async ({ page }) => {
   await page.setViewportSize({ width: 900, height: 1200 });
   await page.goto("/");
 
+  // The icon bar now lives behind the gear button; open it first
+  await page.locator("div.hamburger").click();
+  await expect(page.locator(".expansion-container")).toBeVisible();
+
   // Strip all backgrounds so element screenshots contain only the glyph
   await page.evaluate(() => {
     document.querySelectorAll("*").forEach((el) => {
