@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Deploy "Elisa aprende música" on the macmini: pull, build, publish.
+# Run it ON the macmini from this checkout (~/c/bsharp):
+#
+#   ./serve
+#
+# There is no app process to restart: Caddy serves the built static files
+# straight from $SITE_DIR (see /Users/grillermo/c/server/Caddyfile :$PORT,
+# routed from https://bluey.chiq.me). `make deploy` does the same publish from
+# another machine over rsync+ssh, without the pull.
+
+APP_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$APP_DIR"
+
+# Non-interactive shells (ssh 'cmd', launchd) don't get Homebrew on PATH.
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+SITE_DIR="$HOME/c/elisa-www"
+PORT=8096
+PUBLIC_URL="https://bluey.chiq.me/"
+
+# 1. Store current commit for rollback, then pull
+git -C "$APP_DIR" rev-parse HEAD > /tmp/elisa_prev_commit
+echo "==> git pull"
+git -C "$APP_DIR" pull github main
+
+# 2. Install deps and build from scratch, so nothing stale from an older
+#    build ends up in dist/ (make only rebuilds files whose sources changed).
+echo "==> npm ci"
+npm ci --no-audit --no-fund
+echo "==> make build"
+rm -rf dist
+make build
+
+# 3. Publish. --delete drops files the new build no longer has. index.html is
+#    sent last, so a page loaded mid-publish never references assets that
+#    haven't arrived yet.
+echo "==> Publishing dist/ to $SITE_DIR"
+mkdir -p "$SITE_DIR"
+rsync -a --delete --exclude index.html dist/ "$SITE_DIR/"
+rsync -a dist/index.html "$SITE_DIR/index.html"
+
+# 4. Check Caddy serves the new build.
+echo "==> Checking http://localhost:$PORT/"
+status=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:$PORT/" || true)
+if [ "$status" != "200" ]; then
+  echo "ERROR: Caddy answered $status on :$PORT. Is the :$PORT block in ~/c/server/Caddyfile loaded? (cd ~/c/server && ./reload)"
+  exit 1
+fi
+if ! curl -sf "http://localhost:$PORT/" | cmp -s - dist/index.html; then
+  echo "ERROR: Caddy on :$PORT is not serving the index.html just built."
+  exit 1
+fi
+
+public=$(curl -s -o /dev/null -w '%{http_code}' "$PUBLIC_URL" || true)
+if [ "$public" = "200" ]; then
+  echo "==> $PUBLIC_URL is up"
+else
+  echo "WARNING: $PUBLIC_URL answered $public (local Caddy is fine; check the tunnel or DNS)."
+fi
+
+echo "==> Deploy complete: $(git -C "$APP_DIR" log --oneline -1). Previous commit saved in /tmp/elisa_prev_commit."

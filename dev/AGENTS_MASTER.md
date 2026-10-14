@@ -21,6 +21,7 @@ npm install          # First time only
 make build           # esbuild + sass + copy to dist/
 make check           # TypeScript type checking (tsc --noEmit)
 make deploy          # Build + rsync dist/ to the macmini (bluey.chiq.me)
+./serve              # On the macmini: pull github main, build, publish to ~/c/elisa-www
 make clean           # Remove dist/
 ```
 
