@@ -76,17 +76,11 @@ test("starting again restarts the fill animation", async ({ page }) => {
   expect(rightInset).toBeGreaterThan(90);
 });
 
-test("uses a lighter fill color in both themes", async ({ page }) => {
-  const colors = await page.locator("#next-chord > i").evaluate((element) => {
-    const arrow = element as HTMLElement;
-    const darkFill = getComputedStyle(arrow).getPropertyValue("--next-arrow-fill-color");
-    document.body.classList.remove("colorscheme-dark");
-    document.body.classList.add("colorscheme-light");
-    const lightFill = getComputedStyle(arrow).getPropertyValue("--next-arrow-fill-color");
-    return { darkFill, lightFill };
-  });
+test("uses a fill color in the always-light Elisa theme", async ({ page }) => {
+  await expect(page.locator("body")).toHaveClass(/colorscheme-light/);
+  const fill = await page.locator("#next-chord > i").evaluate((element) =>
+    getComputedStyle(element as HTMLElement).getPropertyValue("--next-arrow-fill-color"),
+  );
 
-  expect(colors.darkFill.trim()).not.toBe("");
-  expect(colors.lightFill.trim()).not.toBe("");
-  expect(colors.darkFill).not.toBe(colors.lightFill);
+  expect(fill.trim()).not.toBe("");
 });

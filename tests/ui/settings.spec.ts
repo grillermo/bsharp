@@ -117,11 +117,12 @@ test("switching profiles applies that profile instrument", async ({ page }) => {
     .check();
   await page.locator("#add-user-button").click();
 
+  await openProfilePanel(page);
   await page.locator("#instrument-selector").selectOption("guitar");
 
-  await openProfilePanel(page);
+  // Switch to Elisa, the default profile (uses fa-paw icon)
   await page
-    .locator("#profile-switcher .switcher-profile:has(.fa-user)")
+    .locator("#profile-switcher .switcher-profile:has(.fa-paw)")
     .click();
 
   await expect(page.locator("#instrument-selector")).toHaveValue("piano_1");

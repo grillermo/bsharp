@@ -85,17 +85,18 @@ test("red option is hidden by default", async ({ page }) => {
   await expect(redOption).toHaveAttribute("hidden", "");
 });
 
-test("instrument selector appears next to level selector with available instruments", async ({
+test("instrument selector appears in settings with available instruments", async ({
   page,
 }) => {
-  await expect(page.locator(".selectors > #chord-selector + #instrument-selector")).toBeVisible();
+  await openProfilePanel(page);
+  await expect(page.locator("#profile-info-container #instrument-selector")).toBeVisible();
 
   const selector = page.locator("#instrument-selector");
   await expect(selector).toHaveValue("piano_1");
   await expect(selector.locator("option")).toHaveText([
     "Piano",
-    "Guitar",
-    "Guitar (Strummed)",
+    "Guitarra",
+    "Guitarra (rasgueo)",
   ]);
 });
 
@@ -103,6 +104,7 @@ test("selecting an instrument persists it on the current profile", async ({
   page,
   context,
 }) => {
+  await openProfilePanel(page);
   const selector = page.locator("#instrument-selector");
   await selector.selectOption("guitar-strummed");
 
@@ -138,6 +140,7 @@ test("selected instrument controls chord audio source", async ({ page }) => {
   });
   await page.goto("/");
 
+  await openProfilePanel(page);
   await page.locator("#instrument-selector").selectOption("guitar");
 
   await expect
