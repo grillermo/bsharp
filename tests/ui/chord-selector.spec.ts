@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openProfilePanel } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
@@ -22,8 +23,10 @@ test("default level shows red and yellow flags", async ({ page }) => {
 });
 
 test("selecting blue shows red, yellow, blue", async ({ page }) => {
+  await openProfilePanel(page);
   const selector = page.locator("#chord-selector");
   await selector.selectOption("blue");
+  await page.locator("#home-button a").click();
 
   await expect(page.locator("#red-flag")).toBeVisible();
   await expect(page.locator("#yellow-flag")).toBeVisible();
@@ -34,8 +37,10 @@ test("selecting blue shows red, yellow, blue", async ({ page }) => {
 test("black chord level shows all white plus selected black chord", async ({
   page,
 }) => {
+  await openProfilePanel(page);
   const selector = page.locator("#chord-selector");
   await selector.selectOption("gray");
+  await page.locator("#home-button a").click();
 
   // All 9 white chords should be visible
   for (const color of [
@@ -60,8 +65,10 @@ test("black chord level shows all white plus selected black chord", async ({
 test("flag container gets flags-compact class with more than 9 flags", async ({
   page,
 }) => {
+  await openProfilePanel(page);
   const selector = page.locator("#chord-selector");
   await selector.selectOption("gray");
+  await page.locator("#home-button a").click();
 
   await expect(page.locator("#flag-holder")).toHaveClass(/flags-compact/);
 });

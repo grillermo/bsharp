@@ -1,0 +1,149 @@
+// Elisa aprende música: bluey.tv look. Imported last so it wins over _theme/_cim.
+
+@font-face {
+    font-family: "hello";
+    src: url("static/fonts/hello-headline.woff2") format("woff2");
+    font-display: swap;
+}
+@font-face {
+    font-family: "open-sans";
+    font-weight: normal;
+    src: url("static/fonts/open-sans-regular.woff2") format("woff2");
+}
+@font-face {
+    font-family: "open-sans";
+    font-weight: bold;
+    src: url("static/fonts/open-sans-bold.woff2") format("woff2");
+}
+
+$bluey-ink: #5a5a87;
+$bluey-ink-pressed: #4e4e7a;
+$bluey-lavender: #d8d7f8;
+$bluey-edge: #abe0fa;
+$bluey-sky-top: #8fd3fb;
+$bluey-sky-bottom: #c2e3fe;
+$bluey-grass: #dbe98a;
+$bluey-yellow: #ffca3a;
+$bluey-coral: #f86468;
+$bluey-mint: #77e0c7;
+$headline: "hello", "open-sans", "arial", sans-serif;
+
+body.colorscheme-light {
+    font-family: "open-sans", "arial", sans-serif;
+    color: $bluey-ink;
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse 22% 6% at 18% 9%, #fff 60%, transparent 62%),
+        radial-gradient(ellipse 18% 5% at 80% 18%, #fff 60%, transparent 62%),
+        radial-gradient(ellipse 14% 4% at 55% 4%, #fff 60%, transparent 62%),
+        linear-gradient(to bottom, $bluey-sky-top 0%, $bluey-sky-bottom 78%, $bluey-grass 78%, darken($bluey-grass, 12%) 100%);
+    background-attachment: fixed;
+}
+
+body.colorscheme-light a { color: $bluey-ink; }
+
+.title-card {
+    width: fit-content;
+    max-width: 90%;
+    margin: 4px auto 20px;
+    padding: 10px 28px 14px;
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 0 0 8px $bluey-edge;
+    transform: rotate(-3deg);
+    text-align: center;
+
+    h1 {
+        margin: 0;
+        font-family: $headline;
+        font-weight: normal;
+        font-size: clamp(30px, 7vw, 56px);
+        line-height: 1.1;
+        color: $bluey-ink;
+    }
+}
+
+// Round play / next buttons.
+body.colorscheme-light div.controls a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 104px;
+    height: 104px;
+    margin: 0 14px;
+    border-radius: 50%;
+    background: $bluey-ink;
+    box-shadow: 0 6px 0 $bluey-ink-pressed, 0 12px 20px rgba(0, 0, 0, 0.15);
+    transition: transform 0.08s, box-shadow 0.08s;
+
+    &:active {
+        transform: translateY(4px);
+        box-shadow: 0 2px 0 $bluey-ink-pressed;
+    }
+    &.deactivated { opacity: 0.35; }
+}
+body.colorscheme-light div.controls i.fa,
+body.colorscheme-light div.controls a.deactivated i.fa {
+    color: #fff;
+    font-size: 48px;
+}
+
+// Flags: rounded, chunky.
+#flag-holder .flag {
+    border-radius: 22px;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.15);
+}
+
+// Gear (settings) button: white circle.
+div.hamburger a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fff;
+    color: $bluey-ink;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+// Panels (settings, info, history) as white cards.
+#panel-area > .panel {
+    background: #fff;
+    color: $bluey-ink;
+    border-radius: 28px;
+    box-shadow: 0 0 0 6px $bluey-edge;
+    padding: 20px;
+}
+
+// Pill buttons.
+body.colorscheme-light .button {
+    font-family: $headline;
+    font-size: 20px;
+    color: #fff;
+    background: $bluey-ink;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 24px;
+
+    &:active { background: $bluey-ink-pressed; }
+}
+
+// Things a 4-year-old should not see on the main screen.
+#stats-container .percent,
+#stats-container .stats-divider,
+#stats-container #stats-total,
+body.colorscheme-light a#reset-button,
+.mode-toggle-container {
+    display: none;
+}
+
+#onboarding-overlay {
+    font-family: $headline;
+    color: $bluey-ink;
+}
+
+// Always the gear; the five-icon bar only opens from it (also on wide iPad screens).
+body.colorscheme-light div.hamburger { display: block; }
+body.colorscheme-light div.menu-container:not(.visible) div.expansion-container { display: none; }
+body.colorscheme-light div.menu-container.visible > div.expansion-container { display: flex; }

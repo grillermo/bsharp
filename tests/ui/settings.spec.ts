@@ -85,7 +85,9 @@ test("switching profiles applies that profile chord level", async ({
   await page.locator("#add-user-button").click();
 
   // Change chord level to blue for the new profile
+  await openProfilePanel(page);
   await page.locator("#chord-selector").selectOption("blue");
+  await page.locator("#home-button a").click();
 
   // Switch back to Guest (Elisa uses fa-paw icon)
   await openProfilePanel(page);
@@ -146,22 +148,4 @@ test("target number persists after save", async ({ page }) => {
   // Re-open the profile panel and verify target number
   await openProfilePanel(page);
   await expect(page.locator("#target_number_setting")).toHaveValue("42");
-});
-
-test("color scheme setting saved to profile", async ({ page }) => {
-  page.on("dialog", (dialog) => dialog.dismiss());
-
-  // Create a profile with light mode
-  await openProfilePanel(page);
-  await page.locator("#profile-switcher .switcher-add").click();
-  await page.locator("#profile_name_setting").fill("Light Theme User");
-  await page
-    .locator("input[name='profile_icon_selector'][value='fa-bolt']")
-    .check();
-  await page.locator("#color-scheme-selector").selectOption("light");
-  await page.locator("#add-user-button").click();
-
-  // Re-open profile panel and verify select shows "light"
-  await openProfilePanel(page);
-  await expect(page.locator("#color-scheme-selector")).toHaveValue("light");
 });

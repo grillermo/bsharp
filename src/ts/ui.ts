@@ -299,15 +299,10 @@ declare global {
     }
 }
 
-export function applyColorScheme(scheme: string): void {
-    if (scheme === 'light') {
-        document.body.classList.remove('colorscheme-dark');
-        document.body.classList.add('colorscheme-light');
-    } else {
-        document.body.classList.remove('colorscheme-light');
-        document.body.classList.add('colorscheme-dark');
-    }
-    window.BSharpAndroid?.setTheme(scheme !== 'light');
+export function applyColorScheme(_scheme: string): void {
+    // Elisa edition: always the bluey.tv light theme.
+    document.body.classList.remove('colorscheme-dark');
+    document.body.classList.add('colorscheme-light');
 }
 
 // --- Profile UI ---

@@ -47,8 +47,9 @@
         </style>
     </head>
 
-    <body class="colorscheme-dark">
+    <body class="colorscheme-light">
     <div class="cim-container">
+        <header class="title-card"><h1>Elisa aprende música</h1></header>
         <div class="menu-container" id="menu-container">
             <div class="menu-spacer"></div>
             <div class="expansion-container">
@@ -98,7 +99,7 @@
                    id="hamburger-link"
                    onclick="toggle_expansion_bar()"
                    >
-                    <i class="fa fa-bars"></i>
+                    <i class="fa fa-cog"></i>
                 </a>
             </div>
         </div>
@@ -137,6 +138,41 @@
             <!-- "Add profile" / "Profile settings" dialog -->
             <div class="profile-info-container panel" id="profile-info-container">
                 <div id="profile-switcher"></div>
+                <div class="entry-row">
+                    <label for="chord-selector">Nivel:</label>
+                    <div class="selectors">
+            <select class="selector" name="chords" id="chord-selector" onchange="change_selector()">
+            <optgroup label="Acordes blancos">
+                <option value="red" hidden>Nivel 0: Rojo (Do Mi Sol)</option>
+                <option value="yellow">Nivel 1: Amarillo (Do Fa La)</option>
+                <option value="blue">Nivel 2: Azul (Si Re Sol)</option>
+                <option value="black">Nivel 3: Negro (La Do Fa)</option>
+                <option value="green">Nivel 4: Verde (Re Sol Si)</option>
+                <option value="orange">Nivel 5: Naranja (Mi Sol Do)</option>
+                <option value="purple">Nivel 6: Morado (Fa La Do)</option>
+                <option value="pink">Nivel 7: Rosa (Sol Si Re)</option>
+                <option value="brown">Nivel 8: Café (Sol Do Mi)</option>
+            </optgroup>
+            <optgroup label="Acordes negros">
+                <option value="gray">Nivel 1: Gris (La Do&#x266F; Mi)</option>
+                <option value="tan">Nivel 2: Beige (Re Fa&#x266F; La)</option>
+                <option value="lightgreen">Nivel 3: Verde claro (Mi Sol&#x266F; Si)</option>
+                <option value="lightpurple">Nivel 4: Lila (Si&#x266D; Re Fa)</option>
+                <option value="skyblue">Nivel 5: Celeste (Mi&#x266D; Sol Si&#x266D;)</option>
+            </optgroup>
+            </select>
+        </div>
+                </div>
+                <div class="entry-row">
+                    <label for="instrument-selector">Instrumento:</label>
+                    <div class="selectors">
+            <select class="selector" name="instrument" id="instrument-selector" onchange="change_instrument_selector()">
+                <option value="piano_1">Piano</option>
+                <option value="guitar">Guitarra</option>
+                <option value="guitar-strummed">Guitarra (rasgueo)</option>
+            </select>
+        </div>
+                </div>
                 <div class="entry-row">
                     <label for="profile_name">Nombre:</label>
                     <input type="text" id="profile_name_setting" class="entry">
@@ -197,7 +233,7 @@
                     <label for="target_number_setting">Meta por sesión:</label>
                     <input type="number" id="target_number_setting" class="entry">
                 </div>
-                <div class="entry-row">
+                <div class="entry-row" hidden>
                     <label for="color_scheme_setting">Tema:</label>
                     <select class="selector" name="color_scheme_setting" id="color-scheme-selector">
                         <option value="dark">Dark</option>
@@ -438,33 +474,6 @@
             <a id="reset-button" onclick="reset_stats()">
                 <i class="fa fa-refresh" aria-hidden="true"></i>
             </a>
-        </div>
-        <div class="selectors">
-            <select class="selector" name="chords" id="chord-selector" onchange="change_selector()">
-            <optgroup label="Acordes blancos">
-                <option value="red" hidden>Nivel 0: Rojo (Do Mi Sol)</option>
-                <option value="yellow">Nivel 1: Amarillo (Do Fa La)</option>
-                <option value="blue">Nivel 2: Azul (Si Re Sol)</option>
-                <option value="black">Nivel 3: Negro (La Do Fa)</option>
-                <option value="green">Nivel 4: Verde (Re Sol Si)</option>
-                <option value="orange">Nivel 5: Naranja (Mi Sol Do)</option>
-                <option value="purple">Nivel 6: Morado (Fa La Do)</option>
-                <option value="pink">Nivel 7: Rosa (Sol Si Re)</option>
-                <option value="brown">Nivel 8: Café (Sol Do Mi)</option>
-            </optgroup>
-            <optgroup label="Acordes negros">
-                <option value="gray">Nivel 1: Gris (La Do&#x266F; Mi)</option>
-                <option value="tan">Nivel 2: Beige (Re Fa&#x266F; La)</option>
-                <option value="lightgreen">Nivel 3: Verde claro (Mi Sol&#x266F; Si)</option>
-                <option value="lightpurple">Nivel 4: Lila (Si&#x266D; Re Fa)</option>
-                <option value="skyblue">Nivel 5: Celeste (Mi&#x266D; Sol Si&#x266D;)</option>
-            </optgroup>
-            </select>
-            <select class="selector" name="instrument" id="instrument-selector" onchange="change_instrument_selector()">
-                <option value="piano_1">Piano</option>
-                <option value="guitar">Guitar</option>
-                <option value="guitar-strummed">Guitar (Strummed)</option>
-            </select>
         </div>
 <div class="mode-toggle-container">
     <a id="download-link" class="download-button" onclick="download_state()">

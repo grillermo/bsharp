@@ -149,7 +149,7 @@ test("guess overlay does NOT appear for profile with existing history", async ({
   await page.locator("#red-flag .flag").click();
 
   // Reset to save session history
-  await page.locator("#reset-button").click();
+  await page.locator("#reset-button").evaluate((el) => (el as HTMLElement).click()); // hidden from the child
 
   // Reload the page
   await page.reload();
@@ -173,7 +173,7 @@ test("overlay reappears when switching to a new profile", async ({ page }) => {
   await page.locator("#play-button").click();
   await expect(overlay).toBeVisible({ timeout: 5000 });
   await page.locator("#red-flag .flag").click();
-  await page.locator("#reset-button").click();
+  await page.locator("#reset-button").evaluate((el) => (el as HTMLElement).click()); // hidden from the child
 
   // Create a new profile via helper (handles hamburger menu)
   await createProfile(page, "Test Child", "fa-truck");
@@ -203,7 +203,7 @@ test("no overlays when onboarding hints disabled in profile settings", async ({
   await page.locator("#submit-changes-button").click();
 
   // Reset stats to trigger initOnboarding flow
-  await page.locator("#reset-button").click();
+  await page.locator("#reset-button").evaluate((el) => (el as HTMLElement).click()); // hidden from the child
 
   // Play overlay should NOT appear
   await expect(overlay).not.toBeVisible();

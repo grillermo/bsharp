@@ -21,7 +21,7 @@ export const DEFAULT_SINGLE_NOTE_MODE = 'white_only_on_black';
 export const DEFAULT_SINGLE_NOTE_CORRECTNESS_MODE = 'only_correct';
 export const DEFAULT_PERSIST_REACTION_FACE = true;
 export const DEFAULT_ENABLE_ONBOARDING_HINTS = true;
-export const DEFAULT_COLOR_SCHEME = 'dark';
+export const DEFAULT_COLOR_SCHEME = 'light';
 export const DEFAULT_CHORD_SELECTION_MODE = 'random';
 
 export let STATE: AppState = null!;

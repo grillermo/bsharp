@@ -114,7 +114,8 @@ test("reset clears stats to zero", async ({ page }) => {
   await expect(page.locator("#stats-total")).toHaveText("1");
 
   // Click reset
-  await page.locator("#reset-button").click();
+  // The reset button is hidden from the child; trigger it directly.
+  await page.locator("#reset-button").evaluate((el) => (el as HTMLElement).click());
 
   await expect(page.locator("#stats-correct")).toHaveText("0");
   await expect(page.locator("#stats-total")).toHaveText("0");
