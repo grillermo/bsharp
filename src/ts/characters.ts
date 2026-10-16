@@ -44,23 +44,54 @@ export function createCharacterDeck(rng: () => number = Math.random): () => stri
 const nextCharacter = createCharacterDeck();
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
 
-export function isRevealing(): boolean {
-    return hideTimer !== null;
+const preloaded = new Map<string, HTMLImageElement>();
+
+function characterUrl(name: string): string {
+    return `static/characters/${name}.png`;
 }
 
-/** Shows a character and its name, then hides it and calls onDone after REVEAL_MS. */
+/** Fetches and decodes every character up front so a reveal never waits on the network. */
+export function preloadCharacters(): void {
+    for (const name of CHARACTERS) {
+        if (preloaded.has(name)) continue;
+        const img = new Image();
+        img.src = characterUrl(name);
+        img.decode().catch(() => { /* a failed preload is retried by the reveal */ });
+        preloaded.set(name, img);
+    }
+}
+
+export function isRevealing(): boolean {
+    return hideTimer !== null || pending;
+}
+
+let pending = false;
+
+/**
+ * Shows a character and its name together, then hides it and calls onDone after REVEAL_MS.
+ * Nothing is shown until the image is decoded, so a name never appears with the wrong picture.
+ */
 export function revealCharacter(onDone: () => void): void {
     const box = document.getElementById('character-reveal');
     if (!box) { onDone(); return; }
     const name = nextCharacter();
+    const label = characterLabel(name);
     const img = box.querySelector('img') as HTMLImageElement;
-    img.src = `static/characters/${name}.png`;
-    img.alt = characterLabel(name);
-    (box.querySelector('.character-name') as HTMLElement).textContent = characterLabel(name);
-    box.classList.add('visible');
-    hideTimer = setTimeout(() => {
-        hideTimer = null;
-        box.classList.remove('visible');
-        onDone();
-    }, REVEAL_MS);
+    const source = preloaded.get(name) ?? new Image();
+    if (!source.src) source.src = characterUrl(name);
+
+    pending = true;
+    const show = () => {
+        pending = false;
+        img.src = characterUrl(name);
+        img.alt = label;
+        (box.querySelector('.character-name') as HTMLElement).textContent = label;
+        box.classList.add('visible');
+        hideTimer = setTimeout(() => {
+            hideTimer = null;
+            box.classList.remove('visible');
+            onDone();
+        }, REVEAL_MS);
+    };
+    source.decode().then(show, show);
 }

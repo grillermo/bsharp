@@ -83,3 +83,16 @@ test("reset clears stats to zero", async ({ page }) => {
   await expect(page.locator("#stats-correct")).toHaveText("0");
   await expect(page.locator("#stats-total")).toHaveText("0");
 });
+
+test("every character image is fetched at page load", async ({ page }) => {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          performance
+            .getEntriesByType("resource")
+            .filter((e) => /static\/characters\/[a-z]+\.png/.test(e.name)).length,
+      ),
+    )
+    .toBe(25);
+});

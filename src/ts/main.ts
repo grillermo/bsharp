@@ -4,6 +4,7 @@ import {
     changeInstrumentSelector, onTrainerOpen, playChord, getEmojiLock, stopCurrentAudio,
     _CORRECT_COLOR
 } from './game';
+import { preloadCharacters } from './characters';
 import { initOnboarding } from './onboarding';
 import {
     toggleExpansionBar, toggleInfoboxVisibility, toggleStatsHistoryVisibility,
@@ -171,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
     changeSelector(profile.current_chord);
     installFlagPointerHandling();
     initOnboarding();
+    preloadCharacters();
     updateStatsDisplay();
     cleanSessionHistory();
     initActiveState();
