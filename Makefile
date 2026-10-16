@@ -19,8 +19,12 @@ dist/bsharp.js: src/ts/*.ts
 dist/style.css: src/scss/*.scss
 	npx sass src/scss/style.scss dist/style.css --no-source-map
 
-dist/index.html: src/index.html
-	cp src/index.html dist/index.html
+# Cloudflare and Safari keep the JS and CSS for hours, so their URLs carry a content hash:
+# a deploy that changes them changes the URL, and index.html (never cached) points at it.
+dist/index.html: src/index.html dist/bsharp.js dist/style.css
+	sed -e "s|href=\"style.css\"|href=\"style.css?v=$$(cksum < dist/style.css | cut -d' ' -f1)\"|" \
+	    -e "s|src=\"bsharp.js\"|src=\"bsharp.js?v=$$(cksum < dist/bsharp.js | cut -d' ' -f1)\"|" \
+	    src/index.html > dist/index.html
 
 dist/static: static
 	cp -r static dist/
