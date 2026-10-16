@@ -131,11 +131,9 @@ body.colorscheme-light .button {
     &:active { background: $bluey-ink-pressed; }
 }
 
-// Things a 4-year-old should not see on the main screen.
-#stats-container .percent,
-#stats-container .stats-divider,
-#stats-container #stats-total,
-body.colorscheme-light a#reset-button,
+// Things a 4-year-old should not see on the main screen. The stats bar stays in the DOM (the
+// game still counts answers in it and the tests read it) but is never drawn.
+#stats-container,
 .mode-toggle-container {
     display: none;
 }
