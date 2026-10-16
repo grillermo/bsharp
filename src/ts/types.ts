@@ -61,6 +61,8 @@ export interface Profile {
     stats: SessionStats;
     current_chord: string;
     current_instrument: string;
+    /** Correct answers in a row at the current level; absent until the first answer. */
+    streak?: number;
 }
 
 export interface AppState {

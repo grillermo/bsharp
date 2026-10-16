@@ -208,3 +208,31 @@ input, select { -webkit-user-select: auto; user-select: auto; }
         .character-name { font-size: 1.3rem; }
     }
 }
+
+// Correct-answer streak: a thin outline around the page that fills clockwise from the top centre.
+#streak-outline {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 4;
+    pointer-events: none;
+    fill: none;
+    stroke-linejoin: round;
+
+    path {
+        stroke-width: 5;
+    }
+
+    .streak-track {
+        stroke: rgba(255, 255, 255, 0.55);
+    }
+
+    .streak-fill {
+        stroke: $bluey-ink;
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        transition-property: stroke-dashoffset;
+        transition-timing-function: ease-in-out;
+    }
+}

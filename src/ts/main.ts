@@ -5,6 +5,7 @@ import {
     _CORRECT_COLOR
 } from './game';
 import { preloadCharacters } from './characters';
+import { initStreakOutline } from './streak';
 import { initOnboarding } from './onboarding';
 import {
     toggleExpansionBar, toggleInfoboxVisibility, toggleStatsHistoryVisibility,
@@ -173,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
     installFlagPointerHandling();
     initOnboarding();
     preloadCharacters();
+    initStreakOutline();
     updateStatsDisplay();
     cleanSessionHistory();
     initActiveState();

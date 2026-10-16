@@ -10,6 +10,7 @@ import { getCurrentCoefficients, updateStartTimeIfNeeded, updateStats, normalize
 import { getAudioFiles, audioFileElem, playChordFiles, preloadAudio } from './audio';
 import { populateFlags, updateStatsDisplay, resetCatEmoji, setCatEmoji, setChordDisplayMode, populateProfileUiElements } from './ui';
 import { revealCharacter, isRevealing } from './characters';
+import { STREAK_TARGET, nextStreak, nextLevel, renderStreakOutline } from './streak';
 import { dismissOnboardingStep, showOnboardingGuessPrompt, showOnboardingPlayPrompt, completeOnboardingIdentification } from './onboarding';
 
 let _COLORS: string[] | null = null;
@@ -143,8 +144,14 @@ export function selectFlagWrapper(wrapperElem: HTMLElement): void {
     updateStats(_CORRECT_COLOR!, chosenColor);
     updateStatsDisplay();
 
+    const profile = getCurrentProfile();
+    profile.streak = nextStreak(profile.streak ?? 0, isCorrect);
+    renderStreakOutline(profile.streak);
+    saveState();
+
     // A wrong tap only sounds its chord and counts as a miss; she keeps guessing.
     if (!isCorrect) return;
+    const levelUp = profile.streak >= STREAK_TARGET;
 
     completeOnboardingIdentification();
     _EMOJI_LOCK = true;
@@ -170,8 +177,25 @@ export function selectFlagWrapper(wrapperElem: HTMLElement): void {
     const nextButton = document.getElementById('next-chord');
     revealCharacter(() => {
         if (nextButton) nextButton.classList.remove('deactivated');
+        if (levelUp && advanceLevel()) return;
         nextAudio();
     });
+}
+
+/** Moves to the next level and plays its first chord. False at the last level. */
+function advanceLevel(): boolean {
+    const profile = getCurrentProfile();
+    const next = nextLevel(STATE.current_chord, Object.keys(CHORDS_TONE));
+    if (next === null) {
+        profile.streak = 0;
+        renderStreakOutline(0);
+        saveState();
+        return false;
+    }
+    changeSelector(next);
+    playAudio();
+    document.getElementById('next-chord')?.classList.add('deactivated');
+    return true;
 }
 
 export function nextAudio(): void {
@@ -227,6 +251,11 @@ export function changeSelector(to?: string): void {
     }
 
     const currentProfile = getCurrentProfile();
+    // A new level starts a new streak. Switching profiles doesn't: that profile's level is
+    // already the selector's value.
+    if (currentProfile.current_chord !== chordSelector.value) {
+        currentProfile.streak = 0;
+    }
     if (STATE.current_chord !== chordSelector.value) {
         resetStats(false);
         STATE.current_chord = chordSelector.value;
@@ -242,6 +271,7 @@ export function changeSelector(to?: string): void {
     populateFlags(getSelectedColors, chordsOn);
     populateAudio();
     showOnboardingPlayPrompt();
+    renderStreakOutline(currentProfile.streak ?? 0);
     saveState();
 
     for (const color of getSelectedColors()) {
