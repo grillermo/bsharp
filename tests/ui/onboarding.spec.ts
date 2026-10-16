@@ -41,7 +41,7 @@ test("guess overlay appears after audio finishes on first session", async ({
   await expect(overlay).toHaveAttribute("data-step", "guess");
 });
 
-test("correct guess shows success overlay on first identification", async ({
+test("a correct guess clears the hint on first identification", async ({
   page,
 }) => {
   const overlay = page.locator("#onboarding-overlay");
@@ -49,20 +49,15 @@ test("correct guess shows success overlay on first identification", async ({
   await page.locator("#play-button").click();
   await expect(overlay).toBeVisible({ timeout: 5000 });
 
-  // Click the correct flag
   const correctColor = await page.evaluate(() => {
     return (window as any).__bsharp_correct_color?.() ?? null;
   });
   await page.locator(`#${correctColor}-flag .flag`).click();
 
-  await expect(overlay).toBeVisible();
-  await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "¡Muy bien! Toca la flecha para seguir",
-  );
-  await expect(overlay).toHaveAttribute("data-step", "goNext");
+  await expect(overlay).not.toBeVisible();
 });
 
-test("wrong guess shows retry overlay on first identification", async ({
+test("a wrong guess keeps the guess hint so she can try again", async ({
   page,
 }) => {
   const overlay = page.locator("#onboarding-overlay");
@@ -70,7 +65,6 @@ test("wrong guess shows retry overlay on first identification", async ({
   await page.locator("#play-button").click();
   await expect(overlay).toBeVisible({ timeout: 5000 });
 
-  // Click the wrong flag
   const correctColor = await page.evaluate(() => {
     return (window as any).__bsharp_correct_color?.() ?? null;
   });
@@ -78,63 +72,25 @@ test("wrong guess shows retry overlay on first identification", async ({
   await page.locator(`#${wrongColor}-flag .flag`).click();
 
   await expect(overlay).toBeVisible();
-  await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "Toca la flecha para intentarlo otra vez",
-  );
-  await expect(overlay).toHaveAttribute("data-step", "goNext");
+  await expect(overlay).toHaveAttribute("data-step", "guess");
 });
 
-test("play click does not dismiss success/retry overlay", async ({ page }) => {
-  const overlay = page.locator("#onboarding-overlay");
-
-  await page.locator("#play-button").click();
-  await expect(overlay).toBeVisible({ timeout: 5000 });
-
-  // Click any flag to get a result overlay (success or retry)
-  await page.locator("#red-flag .flag").click();
-  await expect(overlay).toBeVisible();
-  await expect(overlay).toHaveAttribute("data-step", "goNext");
-
-  // Click play again — overlay should persist
-  await page.locator("#play-button").click();
-  await expect(overlay).toBeVisible();
-  await expect(overlay).toHaveAttribute("data-step", "goNext");
-});
-
-test("result overlay dismissed when clicking next", async ({ page }) => {
-  const overlay = page.locator("#onboarding-overlay");
-
-  await page.locator("#play-button").click();
-  await expect(overlay).toBeVisible({ timeout: 5000 });
-
-  // Click any flag (correct or wrong — both show an overlay)
-  await page.locator("#red-flag .flag").click();
-  await expect(overlay).toBeVisible();
-
-  // Click next — nextAudio auto-plays, so onPlay hides overlay
-  await page.locator("#next-chord").click();
-  await expect(overlay).not.toBeVisible();
-});
-
-test("guess/result overlays do NOT appear after first identification", async ({
+test("guess overlay does NOT appear after first identification", async ({
   page,
 }) => {
   const overlay = page.locator("#onboarding-overlay");
 
-  // First identification: play, wait, guess
   await page.locator("#play-button").click();
   await expect(overlay).toBeVisible({ timeout: 5000 });
-  await page.locator("#red-flag .flag").click();
-  await expect(overlay).toBeVisible(); // success or retry overlay
-
-  // Click next to advance
-  await page.locator("#next-chord").click();
+  const correctColor = await page.evaluate(() => {
+    return (window as any).__bsharp_correct_color?.() ?? null;
+  });
+  await page.locator(`#${correctColor}-flag .flag`).click();
   await expect(overlay).not.toBeVisible();
 
-  // Audio auto-played via next — wait for it to end
-  await page.waitForTimeout(1500);
+  // The character shows, the next chord plays by itself and its audio ends.
+  await page.waitForTimeout(5500);
 
-  // Guess overlay should NOT appear on second identification
   await expect(overlay).not.toBeVisible();
 });
 

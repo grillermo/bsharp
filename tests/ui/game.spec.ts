@@ -1,9 +1,18 @@
 import { test, expect } from "@playwright/test";
 
+// Red is forced as the answer, so red is always correct and yellow always wrong.
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.clear());
+  await page.addInitScript(() => {
+    localStorage.clear();
+    (window as any).__bsharp_test_deterministic_color = "red";
+  });
   await page.goto("/");
 });
+
+async function startQuestion(page: import("@playwright/test").Page) {
+  await page.locator("#play-button").click();
+  await page.waitForTimeout(1000);
+}
 
 test("play button is active after init", async ({ page }) => {
   const playButton = page.locator("#play-button");
@@ -11,109 +20,63 @@ test("play button is active after init", async ({ page }) => {
   await expect(playButton).not.toHaveClass(/deactivated/);
 });
 
-test("next button is deactivated until flag selected", async ({ page }) => {
-  const nextButton = page.locator("#next-chord");
-  await expect(nextButton).toHaveClass(/deactivated/);
+test("a wrong flag changes nothing and she can keep guessing", async ({ page }) => {
+  await startQuestion(page);
+  await page.locator("#yellow-flag").click();
 
-  // Click play to start audio, wait for audio to "play", then select a flag
-  await page.locator("#play-button").click();
-  await page.waitForTimeout(1000);
+  await expect(page.locator("#yellow-flag .flag")).not.toHaveClass(/flag-incorrect|flag-correct/);
+  await expect(page.locator("#red-flag .flag")).not.toHaveClass(/flag-correct/);
+  await expect(page.locator("#character-reveal")).not.toHaveClass(/visible/);
+  await expect(page.locator("#next-chord")).toHaveClass(/deactivated/);
+
+  // The miss still counts in the stats.
+  await expect(page.locator("#stats-total")).toHaveText("1");
+  await expect(page.locator("#stats-correct")).toHaveText("0");
+
+  // A second guess is still accepted.
   await page.locator("#red-flag").click();
-
-  await expect(nextButton).not.toHaveClass(/deactivated/);
+  await expect(page.locator("#red-flag .flag")).toHaveClass(/flag-correct/);
+  await expect(page.locator("#stats-total")).toHaveText("2");
 });
 
-test("selecting a flag shows correct or incorrect feedback", async ({
-  page,
-}) => {
-  await page.locator("#play-button").click();
-  await page.waitForTimeout(1000);
-
-  // At default level, red and yellow are visible. Click red.
-  const redFlag = page.locator("#red-flag .flag");
+test("the right flag shows a named character, then the game advances by itself", async ({ page }) => {
+  await startQuestion(page);
   await page.locator("#red-flag").click();
 
-  // The clicked flag must get exactly one feedback class
-  const isCorrect = await redFlag.evaluate((el) =>
-    el.classList.contains("flag-correct"),
-  );
-  const isIncorrect = await redFlag.evaluate((el) =>
-    el.classList.contains("flag-incorrect"),
-  );
-  expect(isCorrect || isIncorrect).toBe(true);
-  expect(isCorrect && isIncorrect).toBe(false);
-});
+  const reveal = page.locator("#character-reveal");
+  await expect(page.locator("#red-flag .flag")).toHaveClass(/flag-correct/);
+  await expect(reveal).toHaveClass(/visible/);
+  const name = (await reveal.locator(".character-name").textContent())!.trim();
+  expect(name.length).toBeGreaterThan(0);
+  await expect(reveal.locator("img")).toHaveAttribute("src", /static\/characters\/[a-z]+\.png/);
+  await expect(reveal.locator("img")).toHaveJSProperty("complete", true);
 
-test("wrong flag shows flag-incorrect and correct flag is revealed", async ({
-  page,
-}) => {
-  await page.locator("#play-button").click();
-  await page.waitForTimeout(1000);
+  // Taps while the character shows are not counted as answers.
+  await page.locator("#yellow-flag").click();
+  await expect(page.locator("#stats-total")).toHaveText("1");
 
-  // Click red; if it happens to be wrong, the correct flag (yellow) gets flag-correct
-  const redFlag = page.locator("#red-flag .flag");
-  const yellowFlag = page.locator("#yellow-flag .flag");
-  await page.locator("#red-flag").click();
-
-  const redIsIncorrect = await redFlag.evaluate((el) =>
-    el.classList.contains("flag-incorrect"),
-  );
-
-  if (redIsIncorrect) {
-    // Red was wrong, so yellow must be marked correct
-    await expect(yellowFlag).toHaveClass(/flag-correct/);
-  } else {
-    // Red was correct — verify no incorrect class
-    await expect(redFlag).toHaveClass(/flag-correct/);
-    await expect(redFlag).not.toHaveClass(/flag-incorrect/);
-  }
+  // A few seconds later the character is gone and the next chord is up.
+  await expect(reveal).not.toHaveClass(/visible/, { timeout: 5000 });
+  await expect(page.locator("#red-flag .flag")).not.toHaveClass(/flag-correct/);
 });
 
 test("stats counter increments after answering", async ({ page }) => {
   await expect(page.locator("#stats-correct")).toHaveText("0");
   await expect(page.locator("#stats-total")).toHaveText("0");
 
-  await page.locator("#play-button").click();
-  await page.waitForTimeout(1000);
+  await startQuestion(page);
   await page.locator("#red-flag").click();
 
+  await expect(page.locator("#stats-correct")).toHaveText("1");
   await expect(page.locator("#stats-total")).toHaveText("1");
-});
-
-test("next button advances and resets flag feedback", async ({ page }) => {
-  // Answer first question
-  await page.locator("#play-button").click();
-  await page.waitForTimeout(1000);
-  await page.locator("#red-flag").click();
-
-  // Verify feedback is applied
-  const redFlag = page.locator("#red-flag .flag");
-  const hasCorrect = await redFlag.evaluate((el) =>
-    el.classList.contains("flag-correct"),
-  );
-  const hasIncorrect = await redFlag.evaluate((el) =>
-    el.classList.contains("flag-incorrect"),
-  );
-  expect(hasCorrect || hasIncorrect).toBe(true);
-
-  // Click next
-  await page.locator("#next-chord").click();
-  await page.waitForTimeout(500);
-
-  // Feedback classes should be removed from all flags
-  await expect(redFlag).not.toHaveClass(/flag-correct/);
-  await expect(redFlag).not.toHaveClass(/flag-incorrect/);
 });
 
 test("reset clears stats to zero", async ({ page }) => {
-  // Answer a question first
-  await page.locator("#play-button").click();
-  await page.waitForTimeout(1000);
+  await startQuestion(page);
   await page.locator("#red-flag").click();
 
   await expect(page.locator("#stats-total")).toHaveText("1");
 
-  // Click reset
   // The reset button is hidden from the child; trigger it directly.
   await page.locator("#reset-button").evaluate((el) => (el as HTMLElement).click());
 

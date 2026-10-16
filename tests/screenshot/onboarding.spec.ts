@@ -48,37 +48,5 @@ test("guess overlay appearance", async ({ page }) => {
 
   await expect(page).toHaveScreenshot(`guess-overlay-${name}.png`, { clip: await hintArea(page) });
 });
-
-test("success overlay appearance", async ({ page }) => {
-  await page.locator("#play-button").click();
-
-  const overlay = page.locator("#onboarding-overlay");
-  await expect(overlay).toBeVisible({ timeout: 5000 });
-
-  // Color is forced to "red", so clicking red is always correct
-  await page.locator("#red-flag .flag").click();
-
-  await expect(overlay).toHaveAttribute("data-step", "goNext");
-  await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "¡Muy bien! Toca la flecha para seguir",
-  );
-  await expect(page).toHaveScreenshot(`success-overlay-${name}.png`, { clip: await hintArea(page) });
-});
-
-test("retry overlay appearance", async ({ page }) => {
-  await page.locator("#play-button").click();
-
-  const overlay = page.locator("#onboarding-overlay");
-  await expect(overlay).toBeVisible({ timeout: 5000 });
-
-  // Color is forced to "red", so clicking yellow is always wrong
-  await page.locator("#yellow-flag .flag").click();
-
-  await expect(overlay).toHaveAttribute("data-step", "goNext");
-  await expect(overlay.locator(".onboarding-text")).toHaveText(
-    "Toca la flecha para intentarlo otra vez",
-  );
-  await expect(page).toHaveScreenshot(`retry-overlay-${name}.png`, { clip: await hintArea(page) });
-});
 });
 }

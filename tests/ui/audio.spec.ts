@@ -49,26 +49,29 @@ test("rapid play clicks leave audio playing", async ({ page }) => {
   expect(state.paused).toBe(false);
 });
 
-test("next button plays audio for new chord", async ({ page }) => {
+test("answering correctly plays the next chord by itself", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as any).__bsharp_test_deterministic_color = "red";
+  });
+  await page.goto("/");
   await page.locator("#play-button").click();
   await page.waitForTimeout(1000);
   await page.locator("#red-flag .flag").click();
 
-  // Reset spy log before clicking next
+  // Reset spy log, then wait out the character reveal.
   await page.evaluate(() => {
     (window as any).__audioSpy.callLog = [];
   });
-
-  await page.locator("#next-chord").click();
+  await page.waitForTimeout(3500);
 
   const state = await page.evaluate(() => {
     const { callLog, lastPlayedElement } = (window as any).__audioSpy;
     return {
-      lastCall: callLog[callLog.length - 1],
+      played: callLog.includes("play"),
       paused: lastPlayedElement?.paused ?? null,
     };
   });
 
-  expect(state.lastCall).toBe("play");
+  expect(state.played).toBe(true);
   expect(state.paused).toBe(false);
 });

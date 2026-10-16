@@ -9,7 +9,8 @@ import {
 import { getCurrentCoefficients, updateStartTimeIfNeeded, updateStats, normalizeStatsObject } from './stats';
 import { getAudioFiles, audioFileElem, playChordFiles, preloadAudio } from './audio';
 import { populateFlags, updateStatsDisplay, resetCatEmoji, setCatEmoji, setChordDisplayMode, populateProfileUiElements } from './ui';
-import { dismissOnboardingStep, showOnboardingGuessPrompt, showOnboardingGoNextPrompt, showOnboardingPlayPrompt } from './onboarding';
+import { revealCharacter, isRevealing } from './characters';
+import { dismissOnboardingStep, showOnboardingGuessPrompt, showOnboardingPlayPrompt, completeOnboardingIdentification } from './onboarding';
 
 let _COLORS: string[] | null = null;
 let _CHORDS_ON = false;
@@ -134,28 +135,22 @@ export function selectFlagWrapper(wrapperElem: HTMLElement): void {
     stopCurrentAudio();
     playChord(chosenColor);
 
-    if (_SELECTED_ELEM !== null) return;
+    if (_SELECTED_ELEM !== null || isRevealing()) return;
     if (!_AUDIO_PLAYED) return;
 
-    const flagHolder = document.getElementById('flag-holder')!;
-
-    _EMOJI_LOCK = true;
+    const isCorrect = chosenColor === _CORRECT_COLOR;
     updateStartTimeIfNeeded();
     updateStats(_CORRECT_COLOR!, chosenColor);
     updateStatsDisplay();
 
-    const isCorrect = chosenColor === _CORRECT_COLOR;
-    if (isCorrect) {
-        elem.classList.add('flag-correct');
-        setCatEmoji(6);
-    } else {
-        elem.classList.add('flag-incorrect');
-        _CORRECT_ELEM = flagHolder.querySelector(`div[data-color="${_CORRECT_COLOR}"]>div.flag`)!;
-        if (_CORRECT_ELEM) _CORRECT_ELEM.classList.add('flag-correct');
-        setCatEmoji(5);
-    }
+    // A wrong tap only sounds its chord and counts as a miss; she keeps guessing.
+    if (!isCorrect) return;
+
+    completeOnboardingIdentification();
+    _EMOJI_LOCK = true;
+    elem.classList.add('flag-correct');
+    setCatEmoji(6);
     _SELECTED_ELEM = elem;
-    showOnboardingGoNextPrompt(isCorrect);
 
     if (getCurrentProfile().persist_reaction_face &&
         getCurrentProfile().stats.identifications < getCurrentTargetNumber()) {
@@ -171,16 +166,17 @@ export function selectFlagWrapper(wrapperElem: HTMLElement): void {
         document.getElementById('flag-holder')!.classList.add('chord-notes');
     }
 
-    // Single note trainer disabled for now
+    // The character shows for a few seconds, then the next chord plays by itself.
     const nextButton = document.getElementById('next-chord');
-    if (nextButton) nextButton.classList.remove('deactivated');
+    revealCharacter(() => {
+        if (nextButton) nextButton.classList.remove('deactivated');
+        nextAudio();
+    });
 }
 
 export function nextAudio(): void {
     const nextButton = document.getElementById('next-chord');
     if (!nextButton || nextButton.classList.contains('deactivated')) return;
-
-    dismissOnboardingStep('goNext');
 
     if (_CHORDS_ON && getCurrentProfile().reveal_chord_mode === 'after_guess') {
         document.getElementById('flag-holder')!.classList.remove('chord-notes');

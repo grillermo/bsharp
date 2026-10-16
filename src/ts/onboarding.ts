@@ -17,7 +17,6 @@ function checkIsFirstSession(): boolean {
 const STEP_CONFIG: Record<string, { text: string; arrow: boolean }> = {
     play: { text: 'Toca el botón ▶ para escuchar', arrow: true },
     guess: { text: 'Adivina el color', arrow: false },
-    goNext: { text: '', arrow: false },
 };
 
 // The overlay is hidden until .visible is added, so measure after showing it.
@@ -31,7 +30,7 @@ function pointArrowAtPlayButton(overlay: HTMLElement, arrow: HTMLElement): void 
     arrow.style.marginLeft = `${playBox.left + playBox.width / 2 - overlayBox.left}px`;
 }
 
-function showOverlay(step: string, textOverride?: string): void {
+function showOverlay(step: string): void {
     if (!getCurrentProfile().enable_onboarding_hints) return;
     const overlay = document.getElementById('onboarding-overlay');
     if (!overlay) return;
@@ -51,7 +50,7 @@ function showOverlay(step: string, textOverride?: string): void {
 
     const text = document.createElement('span');
     text.className = 'onboarding-text';
-    text.textContent = textOverride ?? config.text;
+    text.textContent = config.text;
     overlay.appendChild(text);
 
     overlay.classList.add('visible');
@@ -92,13 +91,8 @@ export function showOnboardingGuessPrompt(): void {
     }
 }
 
-export function showOnboardingGoNextPrompt(isCorrect: boolean): void {
+/** A correct answer ends the first-session hints; the next chord follows by itself. */
+export function completeOnboardingIdentification(): void {
     hideOverlay();
-    if (_isFirstIdentification) {
-        const text = isCorrect
-            ? '¡Muy bien! Toca la flecha para seguir'
-            : 'Toca la flecha para intentarlo otra vez';
-        showOverlay('goNext', text);
-        _isFirstIdentification = false;
-    }
+    _isFirstIdentification = false;
 }

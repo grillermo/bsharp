@@ -163,3 +163,50 @@ body {
     padding-top: env(safe-area-inset-top);
 }
 input, select { -webkit-user-select: auto; user-select: auto; }
+
+// The character shown after a correct answer: top right, between the centre and the gear.
+#character-reveal {
+    position: fixed;
+    top: 0.75rem;
+    right: 6.5rem;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.6) rotate(-4deg);
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+
+    &.visible {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+
+    img {
+        height: min(30vh, 220px);
+        max-width: 38vw;
+        object-fit: contain;
+        filter: drop-shadow(0 6px 6px rgba(90, 90, 135, 0.35));
+    }
+
+    .character-name {
+        margin-top: 0.25rem;
+        padding: 2px 18px 4px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 0 0 4px $bluey-edge;
+        font-family: $headline;
+        font-size: 1.6rem;
+        color: $bluey-ink;
+    }
+
+    // Portrait: the title spans the top, so sit beside the play/next buttons instead.
+    @media (orientation: portrait) {
+        top: 9.5rem;
+        right: 1.5rem;
+
+        img { height: min(14vh, 130px); }
+        .character-name { font-size: 1.3rem; }
+    }
+}

@@ -36,16 +36,16 @@ test("correct selection outline", async ({ page }) => {
   );
 });
 
-test("incorrect selection outline", async ({ page }) => {
+test("a wrong selection leaves the flags unchanged", async ({ page }) => {
   await page.locator("#play-button").click();
   await page.waitForTimeout(1000);
 
   // Red is the forced color, so clicking yellow is wrong
   await page.locator("#yellow-flag .flag").click();
 
-  await expect(page.locator("#yellow-flag .flag")).toHaveClass(/flag-incorrect/);
+  await expect(page.locator("#yellow-flag .flag")).not.toHaveClass(/flag-incorrect/);
   await expect(page.locator("#flag-holder")).toHaveScreenshot(
-    "flags-incorrect.png",
+    "flags-baseline.png",
   );
 });
 
@@ -255,7 +255,7 @@ test("stats bar after incorrect guess", async ({ page }) => {
   await page.waitForTimeout(1000);
 
   await page.locator("#yellow-flag .flag").click();
-  await expect(page.locator("#yellow-flag .flag")).toHaveClass(/flag-incorrect/);
+  await expect(page.locator("#stats-total")).toHaveText("1");
 
   await expect(page.locator("#stats-container")).toHaveScreenshot(
     "stats-incorrect.png",
