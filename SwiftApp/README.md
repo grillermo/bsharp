@@ -22,6 +22,30 @@ cd SwiftApp/ElisaKit && swift test
 cd SwiftApp && xcodegen generate && open ElisaMusica.xcodeproj
 ```
 
+UI tests (main flows) on the simulator:
+
+```bash
+cd SwiftApp && xcodebuild test -project ElisaMusica.xcodeproj -scheme ElisaMusica -destination 'platform=iOS Simulator,name=iPhone 16e' -derivedDataPath build/dd
+```
+
+Screenshots to compare with `Reference Material/`: the same command with
+`TEST_RUNNER_ELISA_SCREENSHOTS=1` in front and `-only-testing:ElisaMusicaUITests/ScreenshotTests
+-resultBundlePath build/shots.xcresult` at the end, then
+`xcrun xcresulttool export attachments --path build/shots.xcresult --output-path build/shots`.
+
+Launch arguments for testing: `-ElisaFreshState YES` (throwaway progress), `-ElisaLevel <chord
+id>`, `-ElisaAnswer <chord id>` (always ask that chord).
+
+## Progress
+
+Saved in `Application Support/ElisaMusica/progress.json`, in the same format as the web app's
+state download. To bring progress over from https://bluey.chiq.me: in the web app, reveal the
+hidden download link by calling `enable_download()` six times in a row in the browser console
+(under 1.5 s between calls; nothing in the page calls it yet), then tap the download link that
+appears (`#download-link`, or call `download_state()` in the console); get the file onto the iPad (AirDrop to Files); in this app tap the title six
+times quickly, pick the file and tap **Reemplazar**. The previous progress is kept beside it as
+`progress.before-import-<time>.json`.
+
 ## Setup on a new machine
 
 `Config/Local.xcconfig` (gitignored) holds the signing identity:
