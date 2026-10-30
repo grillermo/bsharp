@@ -1,0 +1,15 @@
+// Settings that identify whoever builds and signs the app. These defaults keep a fresh clone
+// building; put your own values in Config/Local.xcconfig, which is gitignored and overrides
+// them. See README.md.
+ELISA_MUSICA_BUNDLE_ID = com.example.elisa-musica
+DEVELOPMENT_TEAM =
+
+// ./deploy passes the OTA manifest URL on the xcodebuild command line (an xcconfig would read
+// the // in a URL as a comment). Builds made any other way leave it empty, so they offer no
+// Install Latest quick action.
+ELISA_MUSICA_OTA_MANIFEST_URL =
+
+// ./deploy --devlog passes the DevLog server URL the same way. Empty, the app records nothing.
+ELISA_MUSICA_DEVLOG_URL =
+
+#include? "Local.xcconfig"
