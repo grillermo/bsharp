@@ -20,6 +20,11 @@ targets:
     platform: iOS
     sources:
       - App
+      # The web app's recordings, as a folder reference: in the bundle at chords/<instrument>/.
+      # A folder (not a group) keeps guitar/ and guitar-strummed/, whose file names are the same.
+      - path: ../static/chords
+        type: folder
+        buildPhase: resources
     dependencies:
       - package: ElisaKit
     settings:
