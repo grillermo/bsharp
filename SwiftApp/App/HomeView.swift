@@ -1,7 +1,9 @@
 import SwiftUI
 
-/// The skeleton screen: sky and title card. Plan 2 adds the controls and flags below.
+/// The main screen. Task 9 of Plan 2 adds the controls and flags.
 struct HomeView: View {
+    let model: GameModel
+
     var body: some View {
         GeometryReader { geo in
             VStack {
@@ -15,4 +17,4 @@ struct HomeView: View {
     }
 }
 
-#Preview { HomeView() }
+#Preview { HomeView(model: GameModel(options: LaunchOptions(freshState: true))) }

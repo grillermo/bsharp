@@ -5,10 +5,13 @@ import UIKit
 @main
 struct ElisaMusicaApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    /// Made once, here: a view's @State initial value can be evaluated again, and the model
+    /// decodes all the audio.
+    @State private var model = GameModel()
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            HomeView(model: model)
         }
     }
 }
