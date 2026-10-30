@@ -1,0 +1,136 @@
+# Plan: "Elisa aprende música" as a native Swift iOS app
+
+Goal: a native SwiftUI app for Elisa's iPad mini 6 (and iPhone) that plays and looks like
+https://bluey.chiq.me, with no web view. `Reference Material/` holds the screenshots and the
+behavior notes the port must match.
+
+## Constraints
+
+- **Private use only.** The Bluey art and fonts belong to Ludo Studio and the BBC, so the app
+  never goes to the App Store or TestFlight. It ships over the air with the iOS OTA deploy
+  pipeline (`iOS OTA deploy pipeline.md` in the AI/Prompts notes, on immunemac): an ad hoc
+  signed .ipa on files.chiq.me, installed from Safari.
+- **Signing uses the paid Apple Developer account** already used for other apps. Ad hoc only
+  installs on devices registered before the build, so Elisa's iPad and the iPhone must be on
+  the developer portal before the first deploy.
+- **iPad and iPhone,** one universal app.
+- **Feature parity first.** Port what the web app does today. No redesign until the native
+  version matches the screenshots. The one new behavior is the instrument switch on level-up
+  (step 8).
+- **The web app stays live** at bluey.chiq.me and keeps being the reference until the iOS app
+  replaces it on the iPad.
+
+## Stack
+
+- SwiftUI, iOS/iPadOS 17+, a single universal target, portrait and landscape.
+- A committed `ElisaMusica.xcodeproj`, not a generated one: `./deploy` bumps
+  `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in `project.pbxproj` and commits that.
+- Signing settings in `Config/ElisaMusica.xcconfig` (committed defaults), overridden by a
+  gitignored `Config/Local.xcconfig` with the real bundle ID and team ID.
+- Audio: `AVAudioEngine` with one `AVAudioPlayerNode` per chord file, all preloaded into
+  buffers, so a tap sounds the chord immediately. The audio session uses `.playback`, so the
+  silent switch doesn't mute it.
+- Persistence: one `Codable` JSON file in Application Support with the same shape as the web
+  app's `bsharp_state` and `bsharp_session_history`, so progress can move between the two.
+- Tests: Swift Testing for the logic (a port of `tests/unit/`) and XCUITest for the main flows.
+
+## Folder layout
+
+The repo root is the web app's, and `make deploy` already deploys it. Everything iOS lives
+under `SwiftApp/`, including its own `deploy` script, so the two never step on each other.
+
+```
+SwiftApp/
+  deploy                  Ruby: build, publish, tag, notify (the OTA pipeline)
+  scripts/deploy/         Ruby helpers for deploy
+  scripts/devlog/server.py
+  Config/                 ElisaMusica.xcconfig, Local.xcconfig (gitignored)
+  .env                    ELISAMUSICA_UPLOAD_BASE etc. (gitignored)
+  ElisaMusica.xcodeproj
+  ElisaMusica/
+    App/            ElisaMusicaApp.swift, AppModel (observable state), InstallLatest (OTA quick action)
+    Model/          Chord.swift (14 chords), Profile, SessionStats, AppState (Codable)
+    Logic/          Stats (confusion matrix, adaptive weights), Streak, CharacterDeck
+    Audio/          ChordPlayer (AVAudioEngine)
+    Diagnostics/    DevLog
+    Views/          GameView, FlagGrid, FlagView, NoteShapes, ControlsBar, StreakOutline,
+                    CharacterReveal, PlayHint, MenuBar, PianoPanel, InfoPanel,
+                    StatsHistoryPanel, ProfilePanel
+    Resources/      chords/, characters/, fonts/, Assets.xcassets (colors, app icon)
+  ElisaMusicaTests/
+  ElisaMusicaUITests/
+  Reference Material/
+```
+
+## Steps
+
+Deployment comes second, so every later step can be tried on the real iPad with one command.
+Each step ends with the app running (simulator, then iPad) and that step's screenshots
+compared side by side.
+
+1. **Skeleton.** Xcode project, app icon from `static/icons/icon-512.png` (also the 1024 px
+   icon the install page uses), the Hello Headline and Open Sans fonts registered, sky
+   gradient, grass and clouds background, and the title card. Check against
+   `level-white-01-amarillo-*`.
+2. **OTA deploy pipeline**, built as the pipeline note describes, with the app named
+   `ElisaMusica`:
+   - `SwiftApp/deploy [minor|major|X.Y.Z] [--yes] [--summary] [--note] [--devlog]`. Before it
+     changes anything it checks: on `main`, a clean tree, the tag `elisamusica-ota-vX.Y.Z`
+     doesn't exist yet, the publish directory exists, and a codesign probe works (it
+     unlocks the keychain if needed). The version bump is restored by `at_exit` if the run
+     fails. On success it commits `Release ElisaMusica OTA <tag>`, tags it and pushes.
+   - Archive and export with `method` = `release-testing`, `thinning` = `<none>`, and a
+     `manifest` dict, so xcodebuild writes the `manifest.plist` itself.
+     `ELISAMUSICA_UNSIGNED=1` falls back to an unsigned zip.
+   - Publish by copying (not uploading) into `~/c/file_server/files/` on the macmini, through
+     a temporary name and a rename. The files go in order: `ElisaMusica-X.Y.Z.ipa`, then
+     `elisamusica-icon.png`, `elisamusica-manifest.plist` and `elisamusica-install.html`.
+     The last three keep fixed names, so one Home Screen bookmark always installs the newest
+     build.
+   - An "Install Latest" Home Screen quick action in the app (`ElisaMusicaOTAManifestURL` in
+     Info.plist), with a unit-tested URL mapping. It quits the app 1.5 s after opening the
+     `itms-services://` link.
+   - An ntfy notification after every deploy. Tapping it starts the install; the install
+     page is a button. Failures go out with high priority. Save this as a project memory.
+   - `--devlog` builds report to `scripts/devlog/server.py` on port 19480. Add `/log/` to
+     `.gitignore`.
+   - Verify without publishing: the preflight failures, an unsigned build and the unit
+     tests. Then do one real deploy, only after you approve it, and install on the iPad.
+3. **Data and logic, test-first.** Port `data.ts`, `utils.ts`, `stats.ts`, `streak.ts` and
+   `characters.ts` to Swift with their tests from `tests/unit/` (adaptive weights, cumulative
+   sums, streak, character deck). No UI.
+4. **Persistence.** `AppState` load and save, profile defaults (`state.ts`), the 30-minute
+   session timeout and history cleanup (`session_cleanup.ts`). Add a JSON import, so Elisa's
+   current progress comes over through the web app's existing (hidden) state download.
+5. **Audio.** Copy the 42 piano MP3s and both guitar sets (14 each), preload all of them, and
+   add `ChordPlayer.play(color:instrument:)`. Piano picks a random short/medium/long take;
+   guitar has one take per chord. Measure the delay from tap
+   to sound on the iPad with a `--devlog` build.
+6. **Game screen.** Flag grid laid out like the web app: full-width rows at the first levels,
+   up to 2 columns on iPhone and 3 on iPad as flags are added (compare every `level-*`
+   screenshot). Play and next buttons, the "flags dimmed until play" state, the answer rules
+   from `game.ts`, the green check, and the play-hint arrow on first run.
+7. **Note shapes.** The shapes and letters on black-key levels (`_note-shapes.scss`) as SwiftUI
+   `Shape`s, honoring the three display settings. Compare `level-black-*`.
+8. **Rewards.** Character reveal for 3 s with the name pill, the streak outline as a trimmed
+   rounded-rectangle stroke (0.9 s fill, 0.35 s unwind), and the level-up at 20 in a row.
+   Compare `state-04` to `state-07`.
+   **New: each level-up also switches the instrument,** piano → guitar → piano → guitar…,
+   so every new level starts on the other instrument. It's saved in the profile like a
+   manual choice. The settings form can still pick any instrument by hand; a level-up from
+   strummed guitar goes to piano. At the last level there's no level-up, so no switch. Test
+   it in Swift Testing next to the streak tests.
+9. **Menu and panels.** Gear menu, piano trainer, info text, stats history and the profile
+   settings form (multiple profiles, icons, all settings). Compare the `menu-*` screenshots.
+10. **iPad polish.** Safe areas, landscape, keeping the screen awake during a session
+    (`isIdleTimerDisabled`), Guided Access instead of the web app's screen-pinning info, and no
+    accidental back or close gestures.
+11. **Switch Elisa over.** Deploy, move her progress over with the import from step 4, do a
+    week of real use alongside the web app, then retire the Home Screen web app.
+
+## Decisions (2026-10-30)
+
+- Paid Apple Developer account: yes, the one already used for other apps.
+- Public files.chiq.me URLs for the .ipa and install page: fine as they are.
+- Keep piano, guitar and strummed guitar, and switch piano ↔ guitar on every level-up.
+- Ship for iPad and iPhone.
