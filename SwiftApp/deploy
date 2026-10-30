@@ -1,0 +1,220 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# deploy
+#
+# One command releases Elisa aprende música to Elisa's iPad and my iPhone over
+# the air: no App Store, TestFlight or cable.
+#
+#   1. bump MARKETING_VERSION / CURRENT_PROJECT_VERSION in SwiftApp/project.yml
+#   2. build an ad-hoc-signed .ipa + its OTA manifest   (scripts/deploy/ipa_builder.rb)
+#   3. publish .ipa, icon, manifest and install page into file_server's files/
+#   4. commit the bump as "Release ElisaMusica OTA <tag>", tag, push to `github`
+#
+# The manifest, icon and install page keep fixed names, so one Home Screen
+# bookmark (https://files.chiq.me/files/elisa-musica-install.html) always
+# installs the newest release.
+#
+# Usage:
+#   ./deploy                      # bump patch (1.0.3 -> 1.0.4)
+#   ./deploy minor|major|1.2.0    # pick the version
+#   ./deploy --yes                # skip the confirmation prompt
+#   ./deploy --summary "Faster sync" --note "Retry after 5 min" --note "Fix chime"
+#   ./deploy --devlog             # diagnostics build: DevLog -> scripts/devlog/server.py
+#
+# --summary is the headline, --note is repeatable (one bullet each). With
+# neither, the notes are the commit subjects since the last release tag, minus
+# merges, releases, "Bump" and "wip", at most 8.
+#
+# Environment (exported, or in the gitignored .env; an exported value wins):
+#   ELISA_MUSICA_UPLOAD_BASE   public URL of file_server (required), e.g. https://files.chiq.me
+#   ELISA_MUSICA_PUBLISH_DIR   where to copy releases (default ../file_server/files)
+#   ELISA_MUSICA_UNSIGNED=1    unsigned build into SwiftApp/build/; publishes nothing
+#   ELISA_MUSICA_DEVLOG_URL    override the --devlog server URL
+#   ELISA_MUSICA_DEVLOG_PORT   port for the default --devlog URL (default 19482)
+#   ELISA_MUSICA_TEAM_ID       override DEVELOPMENT_TEAM from SwiftApp/Config/Local.xcconfig
+#
+# Signing identity: SwiftApp/Config/Local.xcconfig (gitignored) sets
+# ELISA_MUSICA_BUNDLE_ID and DEVELOPMENT_TEAM; see README.md.
+#
+# Why it publishes by copying files: file_server runs on this machine, and
+# uploads over ~12 MB stall in the Cloudflare tunnel (524s).
+
+require_relative "scripts/deploy/dotenv"
+# Before anything reads ENV (Uploader.base_url below).
+Dotenv.load(File.join(__dir__, ".env"))
+
+require_relative "scripts/deploy/ipa_builder"
+require_relative "scripts/deploy/uploader"
+require_relative "scripts/deploy/versioning"
+require_relative "scripts/deploy/release"
+require_relative "scripts/deploy/install_page"
+require "fileutils"
+require "shellwords"
+
+B = IpaBuilder
+REPO_ROOT = B::REPO_ROOT
+YML_REL   = "SwiftApp/project.yml"
+REMOTE    = "github"
+BRANCH    = "main"
+
+PINNED_MANIFEST = "elisa-musica-manifest.plist"
+PINNED_INSTALL  = "elisa-musica-install.html"
+PINNED_ICON     = "elisa-musica-icon.png"
+ICON_SOURCE     = File.join(REPO_ROOT, "SwiftApp/App/Assets.xcassets/AppIcon.appiconset/icon.png") # 1024 px
+
+def git(args) = `git -C #{REPO_ROOT.shellescape} #{args}`
+
+# --- flags -----------------------------------------------------------------------
+
+ASSUME_YES = !ARGV.delete("--yes").nil?
+DEVLOG     = !ARGV.delete("--devlog").nil?
+begin
+  SUMMARY = Release.take_option(ARGV, "--summary", "-s").last
+  NOTES   = Release.parse_notes(Release.take_option(ARGV, "--note", "--notes", "-n"))
+rescue ArgumentError => e
+  B.die(e.message)
+end
+unknown = ARGV.select { |a| a.start_with?("-") }
+B.die("unknown option(s): #{unknown.join(' ')} (see the header of ./deploy)") unless unknown.empty?
+B.die("too many arguments: #{ARGV.join(' ')}") if ARGV.length > 1
+
+MANIFEST_URL = "#{Uploader.base_url}/files/#{PINNED_MANIFEST}"
+INSTALL_URL  = "#{Uploader.base_url}/files/#{PINNED_INSTALL}"
+ICON_URL     = "#{Uploader.base_url}/files/#{PINNED_ICON}"
+ITMS_URL     = "itms-services://?action=download-manifest&url=#{MANIFEST_URL}"
+
+# --- preflight: nothing below touches the working tree until the prompt ----------
+
+branch = git("rev-parse --abbrev-ref HEAD").strip
+B.die("on branch '#{branch}', not '#{BRANCH}'; releases are cut from #{BRANCH}") unless branch == BRANCH
+
+dirty = git("status --porcelain")
+B.die("working tree is dirty -- commit or stash before releasing:\n#{dirty}") unless dirty.strip.empty?
+
+yml_path = B::PROJECT_YML
+current  = Versioning.read(File.read(yml_path))
+begin
+  version = Versioning.bump(current[:marketing], ARGV[0])
+rescue ArgumentError => e
+  B.die(e.message)
+end
+build = current[:build] + 1
+tag   = Release.tag(version)
+asset = "#{B::APP_NAME}-#{version}.ipa"
+# The .ipa name carries the version, so its URL is known before the build (the
+# manifest needs it) and never clobbers a past release. The tag check below is
+# what stops a version from being released twice.
+download = "#{Uploader.base_url}/files/#{asset}"
+
+taken = Release.tags_for(version).find { |t| git("tag -l #{t.shellescape}").strip == t }
+B.die("tag #{taken} already exists -- #{version} was released; pick a new version") if taken
+
+Uploader.check_publish_dir!
+B.die("xcodegen not found (brew install xcodegen)") unless system("command -v xcodegen >/dev/null")
+B.ensure_codesign_can_sign! # unlock the keychain now, not after minutes of compiling
+
+# --- release notes ---------------------------------------------------------------
+
+def notes_from_git
+  matches = Release.tag_patterns.map { |p| "--match #{p.shellescape}" }.join(" ")
+  last = git("describe --tags --abbrev=0 #{matches} 2>/dev/null").strip
+  range = last.empty? ? "-n 20 HEAD" : "#{last.shellescape}..HEAD"
+  Release.filter_subjects(git("log --no-merges --pretty=%s #{range}").lines)
+end
+
+bullets     = NOTES.empty? ? notes_from_git : NOTES
+DESCRIPTION = Release.description(version: version, summary: SUMMARY, bullets: bullets)
+
+puts B.bold("\n==> Releasing #{B::APP_NAME} (OTA) #{current[:marketing]} -> #{version} (build #{build})")
+puts "    #{B.bold('[UNSIGNED: build only, nothing is published]')}" if B.unsigned?
+puts DESCRIPTION.lines.map { |l| "      #{l}" }.join
+puts "\n    Install page: #{INSTALL_URL}"
+
+unless ASSUME_YES
+  print "\n    Continue? [y/N] "
+  B.die("aborted") unless $stdin.gets.to_s.strip.downcase.start_with?("y")
+end
+
+# --- write the bump; restore it on every way out before the commit -------------
+#
+# From here the tree is modified. A run that dies before the commit (failed
+# build, failed publish, exception, Ctrl-C) must put project.yml back: a
+# leftover bump is invisible now but fails the *next* run's clean-tree check
+# with an error pointing nowhere near this run. B.die calls exit, so at_exit is
+# the one hook that sees every exit path.
+
+original  = File.read(yml_path)
+committed = false
+at_exit { File.write(yml_path, original) unless committed }
+
+File.write(yml_path, Versioning.write(original, version: version, build: build))
+
+# --- build -----------------------------------------------------------------------
+
+devlog_url = if DEVLOG
+  port = ENV.fetch("ELISA_MUSICA_DEVLOG_PORT", "19482")
+  ENV["ELISA_MUSICA_DEVLOG_URL"] || "http://#{`scutil --get LocalHostName`.strip}.local:#{port}/api/devlog"
+end
+puts "    DevLog: #{devlog_url} (start scripts/devlog/server.py before installing)" if devlog_url
+
+ipa = B.build(manifest: { app_url: download, icon_url: ICON_URL },
+              ota_manifest_url: MANIFEST_URL, devlog_url: devlog_url)
+work = File.dirname(ipa)
+
+if B.unsigned?
+  # An unsigned .ipa cannot install from Safari, so publishing it would only
+  # break the install page. Hand over the file; at_exit restores project.yml.
+  kept = File.join(B::IOS_DIR, "build", asset) # SwiftApp/build/ is gitignored
+  FileUtils.mkdir_p(File.dirname(kept))
+  FileUtils.cp(ipa, kept)
+  FileUtils.remove_entry(work)
+  puts B.green("\n✓ Unsigned build: #{kept}")
+  puts "    Not published, not committed; the version bump was reverted."
+  exit 0
+end
+
+built_manifest = File.join(work, "manifest.plist")
+B.die("export produced no manifest.plist -- cannot publish the OTA route") unless File.exist?(built_manifest)
+puts B.green("    #{asset} — #{(File.size(ipa) / 1_048_576.0).round(1)} MB")
+
+# --- publish: each file references the one before it, so it must exist first ---
+
+B.step "Publishing the .ipa"
+puts "    #{Uploader.upload(ipa, name: asset)}"
+B.step "Publishing the icon"
+puts "    #{Uploader.upload(ICON_SOURCE, name: PINNED_ICON)}"
+B.step "Publishing the OTA manifest"
+puts "    #{Uploader.upload(built_manifest, name: PINNED_MANIFEST)}"
+
+B.step "Publishing the install page"
+page = File.join(work, PINNED_INSTALL)
+File.write(page, InstallPage.render(version: version, build: build, icon_url: ICON_URL,
+                                    itms_url: ITMS_URL, notes: DESCRIPTION))
+puts "    #{Uploader.upload(page, name: PINNED_INSTALL)}"
+FileUtils.remove_entry(work)
+
+# --- commit, tag, push -----------------------------------------------------------
+
+B.step "Committing + pushing"
+B.run("git add #{YML_REL.shellescape}", chdir: REPO_ROOT)
+B.run("git commit -m #{Release.commit_message(tag).shellescape}", chdir: REPO_ROOT)
+committed = true # the bump lives in a commit now; at_exit must not undo it
+B.run("git tag #{tag.shellescape}", chdir: REPO_ROOT)
+
+push = "git push #{REMOTE} #{BRANCH} --tags"
+puts "    $ #{push}"
+pushed = system(push, chdir: REPO_ROOT)
+local  = git("rev-parse HEAD").strip
+remote = git("ls-remote #{REMOTE} refs/heads/#{BRANCH}").split.first.to_s
+case Release.push_outcome(push_ok: pushed, local: local, remote: remote)
+when :already_on_remote
+  puts B.green("    push reported a failure, but #{REMOTE}/#{BRANCH} is already at #{local[0, 7]}; continuing")
+when :failed
+  B.die("push failed (#{REMOTE}/#{BRANCH} is at #{remote.empty? ? 'nothing' : remote[0, 7]}, we are at #{local[0, 7]}). " \
+        "The release is published and committed locally; push by hand.")
+end
+
+puts B.green("\n✓ Published #{B::APP_NAME} OTA #{version}")
+puts B.bold("\n    Install from Safari on the iPad or iPhone:\n    #{INSTALL_URL}")
+puts "    Or tap: #{ITMS_URL}"
