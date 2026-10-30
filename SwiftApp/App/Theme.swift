@@ -9,6 +9,13 @@ enum Theme {
     static let grass = Color(hex: 0xDBE98A)
     /// $bluey-grass darkened 12%, the bottom of the grass gradient.
     static let grassDark = Color(hex: 0xCBDF56)
+    /// $bluey-ink-pressed: the round buttons' lower edge.
+    static let inkPressed = Color(hex: 0x4E4E7A)
+    /// Note shapes (div.note: #333 at 95 %) and their letters ($fg-color-dark).
+    static let noteInk = Color(hex: 0x333333)
+    static let noteLetter = Color(hex: 0xDADADA)
+    /// The outline and check of a right answer.
+    static let correctGreen = Color(hex: 0x008000)
 
     static func headline(_ size: CGFloat) -> Font { .custom("HelloHeadline", size: size) }
 
