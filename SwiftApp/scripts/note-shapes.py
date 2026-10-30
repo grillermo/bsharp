@@ -8,6 +8,7 @@ match NoteShape's raw values in ElisaKit/Sources/ElisaKit/NoteDisplay.swift. Run
 if a shape changes; the imagesets are committed.
 """
 import json
+import re
 from pathlib import Path
 
 ASSETS = Path(__file__).resolve().parents[1] / "App" / "Assets.xcassets"
@@ -15,6 +16,47 @@ ASSETS = Path(__file__).resolve().parents[1] / "App" / "Assets.xcassets"
 
 def path(d):
     return f'<path d="{d}"/>'
+
+
+def explicit_arcs(d):
+    """Rewrites a relative m/a/z path as absolute M/A/Z with every arc flag its own number.
+    Apple's CoreSVG mis-parses compact flags like "0 00-.4761.475", which drew the moon as a half disc."""
+    num = r"[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?"
+    pos, out, cx, cy, sx, sy = 0, [], 0.0, 0.0, 0.0, 0.0
+
+    def read(pattern):
+        nonlocal pos
+        m = re.compile(r"[\s,]*(" + pattern + ")").match(d, pos)
+        if not m:
+            return None
+        pos = m.end()
+        return m.group(1)
+
+    cmd = None
+    while True:
+        m = re.compile(r"\s*([a-zA-Z])").match(d, pos)
+        if m:
+            cmd, pos = m.group(1), m.end()
+        elif not re.compile(r"[\s,]*" + num).match(d, pos):
+            break
+        if cmd == "z":
+            out.append("Z")
+            cx, cy = sx, sy
+        elif cmd == "m":
+            x, y = float(read(num)), float(read(num))
+            cx, cy = cx + x, cy + y
+            sx, sy = cx, cy
+            out.append(f"M {cx:.5f} {cy:.5f}")
+            cmd = "l"
+        elif cmd == "a":
+            rx, ry, rot = float(read(num)), float(read(num)), float(read(num))
+            large, sweep = read("[01]"), read("[01]")
+            x, y = float(read(num)), float(read(num))
+            cx, cy = cx + x, cy + y
+            out.append(f"A {rx:g} {ry:g} {rot:g} {large} {sweep} {cx:.5f} {cy:.5f}")
+        else:
+            raise ValueError(f"unsupported command {cmd!r}")
+    return " ".join(out)
 
 
 def polygon(points):
@@ -28,8 +70,8 @@ SHAPES = {
     "circle": '<circle cx=".5" cy=".5" r=".5"/>',
     "triangle": path("m.8192 1q.2338-0 .1293-.2028l-.3476-.6741q-.1046-.2028-.2091 0l-.3476.6741q-.1046.2028.1293.2028z"),
     "triangle-down": path("m.1808 0q-.2338 0-.1293.2028l.3476.6741q.1046.2028.2091 0l.3476-.6741q.1046-.2028-.1293-.2028z"),
-    "moon": path("m.5011.025a.4761.475 0 00-.4761.475.4761.475 0 00.4761.475.4761.475 0 00.4739-.4449.3187.318 0 01-.1276.027.3187.318 0 01-.3187-.318.3187.318 0 01.074-.2031.4761.475 0 00-.1016-.0111z"),
-    "moon-flipped": path("m.025.4989a.4761.475 270 00.475.4761.4761.475 270 00.475-.4761.4761.475 270 00-.4449-.4739.3187.318 270 01.027.1276.3187.318 270 01-.318.3187.3187.318 270 01-.2031-.074.4761.475 270 00-.0111.1016z"),
+    "moon": path(explicit_arcs("m.5011.025a.4761.475 0 00-.4761.475.4761.475 0 00.4761.475.4761.475 0 00.4739-.4449.3187.318 0 01-.1276.027.3187.318 0 01-.3187-.318.3187.318 0 01.074-.2031.4761.475 0 00-.1016-.0111z")),
+    "moon-flipped": path(explicit_arcs("m.025.4989a.4761.475 270 00.475.4761.4761.475 270 00.475-.4761.4761.475 270 00-.4449-.4739.3187.318 270 01.027.1276.3187.318 270 01-.318.3187.3187.318 270 01-.2031-.074.4761.475 270 00-.0111.1016z")),
     "heart": path("m 0.27446288,0.02497801 c -0.13778724,0 -0.24945956,0.12061671 -0.24945956,0.26932511 0,0.30247927 0.28243446,0.38179115 0.47499467,0.68067485 0.18220613,-0.2969646 0.47500535,-0.38796757 0.47500535,-0.68067485 0,-0.1487084 -0.1117578,-0.26932511 -0.24945955,-0.26932511 -0.0998009,0 -0.18570023,0.06363921 -0.2255458,0.15530394 -0.0395357,-0.09143312 -0.12536021,-0.15530394 -0.22527867,-0.15530394 z"),
     "heart-down": path("m0.27446 0.97542c-0.13779 0-0.24946-0.12062-0.24946-0.26933 0-0.30248 0.28243-0.38179 0.47499-0.68067 0.18221 0.29696 0.47501 0.38797 0.47501 0.68067 0 0.14871-0.11176 0.26933-0.24946 0.26933-0.099801 0-0.1857-0.063639-0.22555-0.1553-0.039536 0.091433-0.12536 0.1553-0.22528 0.1553z"),
     "pentagon": polygon("50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%"),
