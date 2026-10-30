@@ -12,7 +12,7 @@ struct PlayHint: View {
             Text("↑")
                 .font(.system(size: arrowSize))
                 .foregroundStyle(Theme.ink)
-                .frame(width: buttonSize)
+                .frame(width: buttonSize, height: arrowSize)
                 .accessibilityIdentifier("play-hint")
             Color.clear.frame(width: buttonSize, height: 1)
         }

@@ -40,13 +40,33 @@ struct RoundButtonFace<Label: View>: View {
     @ViewBuilder let label: () -> Label
 
     var body: some View {
-        Circle()
-            .fill(Theme.ink)
+        ZStack {
+            // CSS box-shadows paint only outside the border box, so they must not show through
+            // the dimmed next button's translucent face.
+            ZStack {
+                Circle().fill(Theme.inkPressed).offset(y: pressed ? 2 : 6)
+                Circle().fill(.black.opacity(0.15)).blur(radius: 6).offset(y: 12)
+            }
             .frame(width: size, height: size)
-            .overlay(label().foregroundStyle(.white))
-            .shadow(color: Theme.inkPressed, radius: 0, y: pressed ? 2 : 6)
-            .shadow(color: .black.opacity(0.15), radius: 10, y: 12)
-            .offset(y: pressed ? 4 : 0)
-            .animation(.easeOut(duration: 0.08), value: pressed)
+            .mask { CircleHole(diameter: size).fill(style: FillStyle(eoFill: true)).frame(width: size * 3, height: size * 3) }
+            Circle().fill(Theme.ink).frame(width: size, height: size)
+            label().foregroundStyle(.white)
+        }
+        .frame(width: size, height: size)
+        .offset(y: pressed ? 4 : 0)
+        .animation(.easeOut(duration: 0.08), value: pressed)
+    }
+}
+
+/// A big rectangle with a circle cut out (fill with the even-odd rule).
+struct CircleHole: Shape {
+    let diameter: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.addRect(rect)
+        path.addEllipse(in: CGRect(x: rect.midX - diameter / 2, y: rect.midY - diameter / 2,
+                                   width: diameter, height: diameter))
+        return path
     }
 }

@@ -56,6 +56,8 @@ struct FlagView: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 22)
             .fill(Color(hex: chord.hex))
+            // The shadow belongs to the flag alone, not to the note shapes on it.
+            .shadow(color: .black.opacity(0.15), radius: 0, y: 5)
             .overlay {
                 if let noteStyle {
                     NoteMarks(marks: NoteDisplay.marks(for: chord, shapes: noteStyle.shapes),
@@ -71,7 +73,6 @@ struct FlagView: View {
                         .padding(-4)
                 }
             }
-            .shadow(color: .black.opacity(0.15), radius: 0, y: 5)
             // #flag-holder.awaiting-play .flag: grayscale(1), opacity 0.4.
             .grayscale(dimmed ? 1 : 0)
             .opacity(dimmed ? 0.4 : 1)
@@ -80,12 +81,22 @@ struct FlagView: View {
 
 /// i.answer-icon.correct: a green check outlined in black, a little see-through.
 struct CorrectCheck: View {
+    private static let outline: [CGSize] = (0..<12).map { step in
+        let angle = Double(step) / 12 * 2 * .pi
+        return CGSize(width: cos(angle) * 2.5, height: sin(angle) * 2.5)
+    }
+
+    private var mark: some View {
+        Image(systemName: "checkmark").font(.system(size: 76, weight: .black))
+    }
+
     var body: some View {
-        Image(systemName: "checkmark")
-            .font(.system(size: 56, weight: .black))
-            .foregroundStyle(Theme.correctGreen)
-            .shadow(color: .black, radius: 1)
-            .shadow(color: .black, radius: 1)
-            .opacity(0.75)
+        ZStack {
+            ForEach(Array(Self.outline.enumerated()), id: \.offset) { item in
+                mark.foregroundStyle(.black).offset(item.element)
+            }
+            mark.foregroundStyle(Theme.correctGreen)
+        }
+        .opacity(0.75)
     }
 }
