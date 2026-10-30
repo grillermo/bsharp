@@ -25,6 +25,9 @@ targets:
       - path: ../static/chords
         type: folder
         buildPhase: resources
+    scheme:
+      testTargets:
+        - ElisaMusicaUITests
     dependencies:
       - package: ElisaKit
     settings:
@@ -64,3 +67,16 @@ targets:
         # Lets a ./deploy --devlog build reach http://<mac>.local on the LAN.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+  ElisaMusicaUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: ElisaMusica
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(ELISA_MUSICA_BUNDLE_ID).uitests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        TEST_TARGET_NAME: ElisaMusica
