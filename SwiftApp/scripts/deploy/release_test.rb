@@ -38,7 +38,7 @@ class ReleaseTest < Minitest::Test
 
   def test_filter_subjects_drops_noise_and_caps_at_eight
     subjects = [
-      "Release iOS OTA ios-ota-v1.0.3", "Merge branch 'x'", "Bump deps", "wip: half done", "WIP",
+      "Release ElisaMusica OTA elisa-musica-ota-v1.0.3", "Merge branch 'x'", "Bump deps", "wip: half done", "WIP",
       "", "Fix chime", "Fix chime",
       *(1..9).map { |i| "Change #{i}" }
     ].map { |s| "#{s}\n" }
