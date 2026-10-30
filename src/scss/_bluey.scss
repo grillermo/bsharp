@@ -45,10 +45,12 @@ body.colorscheme-light {
 body.colorscheme-light a { color: $bluey-ink; }
 
 .title-card {
+    flex: none;
     width: fit-content;
-    max-width: 90%;
-    margin: 4px auto 20px;
-    padding: 10px 28px 14px;
+    // Leave room on the right for the gear.
+    max-width: calc(100% - 2 * clamp(40px, 10vmin, 56px) - 24px);
+    margin: 4px auto clamp(8px, 2vh, 20px);
+    padding: clamp(6px, 1.2vh, 10px) clamp(14px, 4vw, 28px) clamp(8px, 1.6vh, 14px);
     background: #fff;
     border-radius: 28px;
     box-shadow: 0 0 0 8px $bluey-edge;
@@ -59,7 +61,7 @@ body.colorscheme-light a { color: $bluey-ink; }
         margin: 0;
         font-family: $headline;
         font-weight: normal;
-        font-size: clamp(30px, 7vw, 56px);
+        font-size: clamp(20px, min(6vw, 4.5vh), 56px);
         line-height: 1.1;
         color: $bluey-ink;
     }
@@ -70,9 +72,9 @@ body.colorscheme-light div.controls a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 104px;
-    height: 104px;
-    margin: 0 14px;
+    width: clamp(56px, min(14vmin, 11vh), 104px);
+    height: clamp(56px, min(14vmin, 11vh), 104px);
+    margin: 0 clamp(8px, 3vw, 14px);
     border-radius: 50%;
     background: $bluey-ink;
     box-shadow: 0 6px 0 $bluey-ink-pressed, 0 12px 20px rgba(0, 0, 0, 0.15);
@@ -87,7 +89,8 @@ body.colorscheme-light div.controls a {
 body.colorscheme-light div.controls i.fa,
 body.colorscheme-light div.controls a.deactivated i.fa {
     color: #fff;
-    font-size: 48px;
+    font-size: clamp(26px, min(6.5vmin, 5vh), 48px);
+    margin: 0;
 }
 
 // Flags: rounded, chunky.
@@ -101,8 +104,9 @@ div.hamburger a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
+    width: clamp(40px, 10vmin, 56px);
+    height: clamp(40px, 10vmin, 56px);
+    font-size: clamp(24px, 6vmin, 3rem);
     border-radius: 50%;
     background: #fff;
     color: $bluey-ink;
@@ -201,10 +205,10 @@ input, select { -webkit-user-select: auto; user-select: auto; }
 
     // Portrait: the title spans the top, so sit beside the play/next buttons instead.
     @media (orientation: portrait) {
-        top: 9.5rem;
-        right: 1.5rem;
+        top: calc(env(safe-area-inset-top) + 9vh);
+        right: 0.75rem;
 
-        img { height: min(14vh, 130px); }
+        img { height: min(11vh, 130px); max-width: 28vw; }
         .character-name { font-size: 1.3rem; }
     }
 }
@@ -215,6 +219,7 @@ input, select { -webkit-user-select: auto; user-select: auto; }
     inset: 0;
     width: 100vw;
     height: 100vh;
+    height: 100svh;
     z-index: 4;
     pointer-events: none;
     fill: none;
@@ -235,4 +240,52 @@ input, select { -webkit-user-select: auto; user-select: auto; }
         transition-property: stroke-dashoffset;
         transition-timing-function: ease-in-out;
     }
+}
+
+// After a correct answer the next chord waits for the play button; the greyed flags say so.
+#flag-holder.awaiting-play .flag {
+    filter: grayscale(1);
+    opacity: 0.4;
+}
+
+// --- Fit the whole game in the viewport, on any screen from an iPhone 16e to an iPad ---
+// The title and the play/next row keep their size; the flags share whatever height is left,
+// in a grid whose rows shrink so the last one never drops below the screen.
+// svh is the height with Safari's toolbars showing; dvh came out taller on iOS 26 and cut off
+// the last row of flags.
+body { height: 100vh; height: 100svh; }
+div.cim-container { overflow: hidden; }
+div.cim-container > .control-wrapper {
+    flex: none;
+    padding: 0 0 clamp(6px, 1.5vh, 16px);
+}
+#onboarding-overlay { flex: none; }
+#onboarding-overlay .onboarding-arrow { font-size: clamp(1.8rem, 5vh, 3rem); }
+
+#flag-holder {
+    flex: 1 1 0;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+    gap: clamp(6px, 1.5vmin, 14px);
+
+    &.flags-expanded { grid-template-columns: minmax(0, 1fr); }
+    &.flags-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    > .flag-spacer { display: none; }
+
+    > .flag-wrapper {
+        width: auto;
+        max-height: none;
+        margin: 0;
+    }
+}
+div.cim-container.panel-open > #flag-holder { display: none; }
+
+// Wider than tall (iPad landscape): more columns, fewer rows.
+@media (orientation: landscape) {
+    #flag-holder { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    #flag-holder.flags-expanded { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    #flag-holder.flags-compact { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }

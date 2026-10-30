@@ -88,8 +88,10 @@ test("guess overlay does NOT appear after first identification", async ({
   await page.locator(`#${correctColor}-flag .flag`).click();
   await expect(overlay).not.toBeVisible();
 
-  // The character shows, the next chord plays by itself and its audio ends.
-  await page.waitForTimeout(5500);
+  // The character shows, then she plays the next chord and its audio ends.
+  await expect(page.locator("#flag-holder")).toHaveClass(/awaiting-play/, { timeout: 5000 });
+  await page.locator("#play-button").click();
+  await page.waitForTimeout(1500);
 
   await expect(overlay).not.toBeVisible();
 });

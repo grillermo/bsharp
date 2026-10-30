@@ -14,9 +14,9 @@ function checkIsFirstSession(): boolean {
     return true;
 }
 
-const STEP_CONFIG: Record<string, { text: string; arrow: boolean }> = {
-    play: { text: 'Toca el botón ▶ para escuchar', arrow: true },
-    guess: { text: 'Adivina el color', arrow: false },
+// She can't read yet, so a hint is only an arrow at the play button; no text.
+const STEP_CONFIG: Record<string, { arrow: boolean }> = {
+    play: { arrow: true },
 };
 
 // The overlay is hidden until .visible is added, so measure after showing it.
@@ -47,11 +47,6 @@ function showOverlay(step: string): void {
         overlay.appendChild(arrow);
         pointArrowAtPlayButton(overlay, arrow);
     }
-
-    const text = document.createElement('span');
-    text.className = 'onboarding-text';
-    text.textContent = config.text;
-    overlay.appendChild(text);
 
     overlay.classList.add('visible');
 }

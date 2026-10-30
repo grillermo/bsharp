@@ -49,7 +49,7 @@ test("rapid play clicks leave audio playing", async ({ page }) => {
   expect(state.paused).toBe(false);
 });
 
-test("answering correctly plays the next chord by itself", async ({ page }) => {
+test("after a correct answer the next chord waits for the play button", async ({ page }) => {
   await page.addInitScript(() => {
     (window as any).__bsharp_test_deterministic_color = "red";
   });
@@ -64,14 +64,18 @@ test("answering correctly plays the next chord by itself", async ({ page }) => {
   });
   await page.waitForTimeout(3500);
 
-  const state = await page.evaluate(() => {
-    const { callLog, lastPlayedElement } = (window as any).__audioSpy;
-    return {
-      played: callLog.includes("play"),
-      paused: lastPlayedElement?.paused ?? null,
-    };
-  });
+  // Nothing plays and the flags are greyed out, ignoring taps.
+  expect(await page.evaluate(() => (window as any).__audioSpy.callLog.includes("play"))).toBe(false);
+  await expect(page.locator("#flag-holder")).toHaveClass(/awaiting-play/);
+  await page.locator("#red-flag .flag").click();
+  expect(await page.evaluate(() => (window as any).__audioSpy.callLog.includes("play"))).toBe(false);
+  await expect(page.locator("#stats-total")).toHaveText("1");
 
-  expect(state.played).toBe(true);
-  expect(state.paused).toBe(false);
+  // Play brings the flags back and sounds the new chord.
+  await page.locator("#play-button").click();
+  await expect(page.locator("#flag-holder")).not.toHaveClass(/awaiting-play/);
+  const paused = await page.evaluate(
+    () => (window as any).__audioSpy.lastPlayedElement?.paused ?? null,
+  );
+  expect(paused).toBe(false);
 });

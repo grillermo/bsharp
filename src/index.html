@@ -28,12 +28,12 @@
             }
 
             div.cim-container {
-                padding: 40px 10px 10px 10px !important;
+                padding: calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 8px) 10px !important;
                 box-sizing: border-box !important;
             }
 
             div.hamburger {
-                margin-top: 60px !important;
+                margin-top: calc(env(safe-area-inset-top) + 8px) !important;
             }
 
             div.menu-container.visible div.hamburger {

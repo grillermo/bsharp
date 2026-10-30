@@ -83,6 +83,8 @@ test("the 20th correct answer in a row moves to the next level by itself", async
   await expect(page.locator("#chord-selector")).toHaveValue("blue", { timeout: 6000 });
   await expect.poll(() => offset(page)).toBe(1);
   await expect(page.locator("#blue-flag")).toBeVisible();
+  // Its first chord waits for the play button too.
+  await expect(page.locator("#flag-holder")).toHaveClass(/awaiting-play/);
 });
 
 test("changing the level by hand resets the streak", async ({ page }) => {

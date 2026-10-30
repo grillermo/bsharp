@@ -119,6 +119,7 @@ export function playAudio(): void {
     if (!_CURRENT_AUDIO) return;
 
     dismissOnboardingStep('play');
+    setAwaitingPlay(false);
     const [chord, duration] = _CURRENT_AUDIO;
     stopCurrentAudio();
     const safeDuration = isNaN(duration) ? 0.8 : duration;
@@ -131,6 +132,7 @@ export function selectFlagWrapper(wrapperElem: HTMLElement): void {
     const chosenColor = wrapperElem.dataset.color;
     const elem = wrapperElem.querySelector(':scope > .flag') as HTMLElement | null;
     if (!chosenColor || !elem) return;
+    if (isAwaitingPlay()) return;
 
     // Piano mode: every tap sounds its chord, answering or not.
     stopCurrentAudio();
@@ -173,16 +175,28 @@ export function selectFlagWrapper(wrapperElem: HTMLElement): void {
         document.getElementById('flag-holder')!.classList.add('chord-notes');
     }
 
-    // The character shows for a few seconds, then the next chord plays by itself.
-    const nextButton = document.getElementById('next-chord');
+    // The character shows for a few seconds, then the next chord is loaded but not played:
+    // the flags grey out until she presses play herself.
     revealCharacter(() => {
-        if (nextButton) nextButton.classList.remove('deactivated');
-        if (levelUp && advanceLevel()) return;
-        nextAudio();
+        if (!(levelUp && advanceLevel())) {
+            if (_CHORDS_ON && getCurrentProfile().reveal_chord_mode === 'after_guess') {
+                document.getElementById('flag-holder')!.classList.remove('chord-notes');
+            }
+            populateAudio();
+        }
+        setAwaitingPlay(true);
     });
 }
 
-/** Moves to the next level and plays its first chord. False at the last level. */
+function setAwaitingPlay(awaiting: boolean): void {
+    document.getElementById('flag-holder')?.classList.toggle('awaiting-play', awaiting);
+}
+
+function isAwaitingPlay(): boolean {
+    return document.getElementById('flag-holder')?.classList.contains('awaiting-play') ?? false;
+}
+
+/** Moves to the next level and loads its first chord. False at the last level. */
 function advanceLevel(): boolean {
     const profile = getCurrentProfile();
     const next = nextLevel(STATE.current_chord, Object.keys(CHORDS_TONE));
@@ -193,8 +207,6 @@ function advanceLevel(): boolean {
         return false;
     }
     changeSelector(next);
-    playAudio();
-    document.getElementById('next-chord')?.classList.add('deactivated');
     return true;
 }
 

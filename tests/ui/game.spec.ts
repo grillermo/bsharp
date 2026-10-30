@@ -39,7 +39,7 @@ test("a wrong flag changes nothing and she can keep guessing", async ({ page }) 
   await expect(page.locator("#stats-total")).toHaveText("2");
 });
 
-test("the right flag shows a named character, then the game advances by itself", async ({ page }) => {
+test("the right flag shows a named character, then the next chord waits for play", async ({ page }) => {
   await startQuestion(page);
   await page.locator("#red-flag").click();
 
@@ -55,9 +55,13 @@ test("the right flag shows a named character, then the game advances by itself",
   await page.locator("#yellow-flag").click();
   await expect(page.locator("#stats-total")).toHaveText("1");
 
-  // A few seconds later the character is gone and the next chord is up.
+  // A few seconds later the character is gone, the next chord is loaded and the flags
+  // stay greyed out until play is pressed.
   await expect(reveal).not.toHaveClass(/visible/, { timeout: 5000 });
   await expect(page.locator("#red-flag .flag")).not.toHaveClass(/flag-correct/);
+  await expect(page.locator("#flag-holder")).toHaveClass(/awaiting-play/);
+  await expect(page.locator("#play-button")).not.toHaveClass(/deactivated/);
+  await expect(page.locator("#next-chord")).toHaveClass(/deactivated/);
 });
 
 test("stats counter increments after answering", async ({ page }) => {
