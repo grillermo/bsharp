@@ -41,24 +41,17 @@ under `SwiftApp/`, including its own `deploy` script, so the two never step on e
 
 ```
 SwiftApp/
-  deploy                  Ruby: build, publish, tag, notify (the OTA pipeline)
-  scripts/deploy/         Ruby helpers for deploy
+  deploy                  Ruby: preflight, bump, build, publish, tag, push (the OTA pipeline)
+  scripts/deploy/         Ruby helpers for deploy (+ _test.rb each)
   scripts/devlog/server.py
   Config/                 ElisaMusica.xcconfig, Local.xcconfig (gitignored)
-  .env                    ELISAMUSICA_UPLOAD_BASE etc. (gitignored)
-  ElisaMusica.xcodeproj
-  ElisaMusica/
-    App/            ElisaMusicaApp.swift, AppModel (observable state), InstallLatest (OTA quick action)
-    Model/          Chord.swift (14 chords), Profile, SessionStats, AppState (Codable)
-    Logic/          Stats (confusion matrix, adaptive weights), Streak, CharacterDeck
-    Audio/          ChordPlayer (AVAudioEngine)
-    Diagnostics/    DevLog
-    Views/          GameView, FlagGrid, FlagView, NoteShapes, ControlsBar, StreakOutline,
-                    CharacterReveal, PlayHint, MenuBar, PianoPanel, InfoPanel,
-                    StatsHistoryPanel, ProfilePanel
-    Resources/      chords/, characters/, fonts/, Assets.xcassets (colors, app icon)
-  ElisaMusicaTests/
-  ElisaMusicaUITests/
+  .env                    ELISA_MUSICA_UPLOAD_BASE (gitignored)
+  project.yml             XcodeGen source of truth; ElisaMusica.xcodeproj is generated
+  App/                    SwiftUI app: ElisaMusicaApp, QuickActions, Theme, SkyBackground,
+                          TitleCard, HomeView, Fonts/, Assets.xcassets/
+  ElisaKit/               local Swift package (Sources/ElisaKit, Tests/ElisaKitTests):
+                          Chords, Progression, AdaptiveWeights, CharacterDeck,
+                          AppQuickAction, DevLog
   Reference Material/
 ```
 
@@ -68,23 +61,23 @@ Deployment comes second, so every later step can be tried on the real iPad with 
 Each step ends with the app running (simulator, then iPad) and that step's screenshots
 compared side by side.
 
-1. **Skeleton.** Xcode project, app icon from `static/icons/icon-512.png` (also the 1024 px
+1. **Skeleton (done).** Xcode project, app icon from `static/icons/icon-512.png` (also the 1024 px
    icon the install page uses), the Hello Headline and Open Sans fonts registered, sky
    gradient, grass and clouds background, and the title card. Check against
    `level-white-01-amarillo-*`.
-2. **OTA deploy pipeline**, built as the pipeline note describes, with the app named
+2. **OTA deploy pipeline (done)**, built as the pipeline note describes, with the app named
    `ElisaMusica`:
    - `SwiftApp/deploy [minor|major|X.Y.Z] [--yes] [--summary] [--note] [--devlog]`. Before it
-     changes anything it checks: on `main`, a clean tree, the tag `elisamusica-ota-vX.Y.Z`
+     changes anything it checks: on `main`, a clean tree, the tag `elisa-musica-ota-vX.Y.Z`
      doesn't exist yet, the publish directory exists, and a codesign probe works (it
      unlocks the keychain if needed). The version bump is restored by `at_exit` if the run
      fails. On success it commits `Release ElisaMusica OTA <tag>`, tags it and pushes.
    - Archive and export with `method` = `release-testing`, `thinning` = `<none>`, and a
      `manifest` dict, so xcodebuild writes the `manifest.plist` itself.
-     `ELISAMUSICA_UNSIGNED=1` falls back to an unsigned zip.
+     `ELISA_MUSICA_UNSIGNED=1` falls back to an unsigned zip.
    - Publish by copying (not uploading) into `~/c/file_server/files/` on the macmini, through
      a temporary name and a rename. The files go in order: `ElisaMusica-X.Y.Z.ipa`, then
-     `elisamusica-icon.png`, `elisamusica-manifest.plist` and `elisamusica-install.html`.
+     `elisa-musica-icon.png`, `elisa-musica-manifest.plist` and `elisa-musica-install.html`.
      The last three keep fixed names, so one Home Screen bookmark always installs the newest
      build.
    - An "Install Latest" Home Screen quick action in the app (`ElisaMusicaOTAManifestURL` in
@@ -92,7 +85,7 @@ compared side by side.
      `itms-services://` link.
    - An ntfy notification after every deploy. Tapping it starts the install; the install
      page is a button. Failures go out with high priority. Save this as a project memory.
-   - `--devlog` builds report to `scripts/devlog/server.py` on port 19480. Add `/log/` to
+   - `--devlog` builds report to `scripts/devlog/server.py` on port 19482. Add `/log/` to
      `.gitignore`.
    - Verify without publishing: the preflight failures, an unsigned build and the unit
      tests. Then do one real deploy, only after you approve it, and install on the iPad.
