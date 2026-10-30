@@ -57,6 +57,11 @@ final class ChordPlayer {
         let started = CACurrentMediaTime()
         // An interruption (a call, Siri) or a route change stops the engine.
         if !engine.isRunning { startEngine() }
+        // Playing a node on a stopped engine raises an Objective-C exception, so stay silent.
+        guard engine.isRunning else {
+            DevLog.event("audio.play-skipped", ["color": color])
+            return
+        }
         player.stop()
         player.scheduleBuffer(take, completionHandler: nil)
         player.play()
@@ -64,6 +69,8 @@ final class ChordPlayer {
     }
 
     private func startEngine() {
+        // An interruption deactivates the session, so bring it back before restarting.
+        try? AVAudioSession.sharedInstance().setActive(true)
         do {
             try engine.start()
         } catch {
