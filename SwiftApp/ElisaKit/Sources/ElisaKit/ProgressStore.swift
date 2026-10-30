@@ -17,8 +17,8 @@ public struct ProgressStore: Sendable {
     /// The saved progress, or nil when there is none. A file that can't be read is moved aside
     /// (`progress.unreadable-<time>.json`) so the next save doesn't overwrite it.
     public func load(now: Double) -> SavedProgress? {
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        if let progress = try? Self.decode(data) { return progress }
+        guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) else { return nil }
+        if let data = try? Data(contentsOf: url), let progress = try? Self.decode(data) { return progress }
         try? FileManager.default.moveItem(at: url, to: sibling("unreadable", now: now))
         return nil
     }
@@ -46,7 +46,16 @@ public struct ProgressStore: Sendable {
         return try encoder.encode(progress)
     }
 
+    /// `progress.<label>-<time>.json`, or with a `-1`, `-2`, … suffix when that name is taken.
     private func sibling(_ label: String, now: Double) -> URL {
-        url.deletingLastPathComponent().appending(path: "progress.\(label)-\(Int(now)).json")
+        let folder = url.deletingLastPathComponent()
+        let base = "progress.\(label)-\(Int(now))"
+        var candidate = folder.appending(path: "\(base).json")
+        var n = 1
+        while FileManager.default.fileExists(atPath: candidate.path(percentEncoded: false)) {
+            candidate = folder.appending(path: "\(base)-\(n).json")
+            n += 1
+        }
+        return candidate
     }
 }
