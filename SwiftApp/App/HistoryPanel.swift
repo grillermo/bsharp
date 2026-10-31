@@ -21,7 +21,7 @@ struct HistoryPanel: View {
                                 .frame(width: 36, height: 36)
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(row.date()).font(Theme.text(16))
-                                summary(row.summary)
+                                Text(row.summary).font(Theme.text(20, bold: true))
                             }
                         }
                         .accessibilityElement(children: .combine)
@@ -31,16 +31,6 @@ struct HistoryPanel: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-    }
-
-    /// The face is drawn in the system font: Open Sans has no emoji and the fallback shows a box.
-    private func summary(_ text: String) -> Text {
-        guard let space = text.lastIndex(of: " ") else {
-            return Text(text).font(Theme.text(20, bold: true))
-        }
-        let score = String(text[..<space])
-        let face = String(text[text.index(after: space)...])
-        return Text(score + " ").font(Theme.text(20, bold: true)) + Text(face).font(.system(size: 20))
     }
 }
 
