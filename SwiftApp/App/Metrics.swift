@@ -31,7 +31,7 @@ struct Metrics {
     var revealImageMaxWidth: CGFloat { landscape ? 38 * vw : 28 * vw }
     /// .character-name font: portrait 1.3rem, landscape 1.6rem
     var revealNameFont: CGFloat { landscape ? 25.6 : 20.8 }
-    /// top: portrait 9vh below the safe area, landscape 0.75rem
+    /// top: landscape 0.75rem. Portrait (9vh) stands the character on the flags instead, see HomeView.
     var revealTop: CGFloat { landscape ? 12 : 9 * vh }
     /// right: portrait 0.75rem, landscape 6.5rem (clear of the gear Plan 4 adds)
     var revealTrailing: CGFloat { landscape ? 104 : 12 }

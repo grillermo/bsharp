@@ -32,20 +32,24 @@ struct HomeView: View {
                 FlagGrid(chords: model.game.chords, landscape: metrics.landscape, gap: metrics.flagGap,
                          marked: model.game.marked, dimmed: model.game.awaitingPlay,
                          noteStyle: model.game.noteStyle, onTap: { model.tap($0) })
+                    // Portrait: stand the character on the flags. The web's 9vh lands its feet
+                    // there; anchoring to the flags keeps that with the status bar above.
+                    .overlay(alignment: .topTrailing) {
+                        if !metrics.landscape {
+                            reveal(metrics)
+                                .padding(.trailing, metrics.revealTrailing - 10)
+                                .offset(y: 4 - metrics.revealImageHeight)
+                        }
+                    }
             }
             .padding(.horizontal, 10)
             .padding(.bottom, 10)
             .overlay(alignment: .topTrailing) {
-                ZStack {
-                    if let name = model.game.character {
-                        CharacterReveal(name: name, metrics: metrics)
-                            .id(name)
-                            .padding(.top, metrics.revealTop)
-                            .padding(.trailing, metrics.revealTrailing)
-                            .transition(.opacity)
-                    }
+                if metrics.landscape {
+                    reveal(metrics)
+                        .padding(.top, metrics.revealTop)
+                        .padding(.trailing, metrics.revealTrailing)
                 }
-                .animation(.easeInOut(duration: 0.25), value: model.game.character)
             }
         }
         .background(SkyBackground())
@@ -71,6 +75,18 @@ struct HomeView: View {
         } message: {
             Text(importError ?? "")
         }
+    }
+
+    /// The character reveal, faded in and out as the right answer's character comes and goes.
+    private func reveal(_ metrics: Metrics) -> some View {
+        ZStack {
+            if let name = model.game.character {
+                CharacterReveal(name: name, metrics: metrics)
+                    .id(name)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: model.game.character)
     }
 
     /// Reads and checks the file before asking, so a wrong file fails here and not after

@@ -15,7 +15,11 @@ struct CharacterReveal: View {
                     .resizable()
                     .interpolation(.high)
                     .scaledToFit()
-                    .frame(maxWidth: metrics.revealImageMaxWidth, maxHeight: metrics.revealImageHeight)
+                    // The img box is as wide as the picture at that height (capped by max-width),
+                    // so the character sits flush with `right` instead of centred in a wide box.
+                    .frame(width: min(metrics.revealImageHeight * image.size.width / max(image.size.height, 1),
+                                      metrics.revealImageMaxWidth),
+                           height: metrics.revealImageHeight)
                     .shadow(color: Theme.ink.opacity(0.35), radius: 6, y: 6)
             }
             Text(Characters.label(name))

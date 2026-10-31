@@ -28,8 +28,8 @@ final class ScreenshotTests: XCTestCase {
         return app
     }
 
-    private func keep(_ app: XCUIApplication, _ name: String) {
-        Thread.sleep(forTimeInterval: 0.5) // let any animation finish before the capture
+    private func keep(_ app: XCUIApplication, _ name: String, settle: TimeInterval = 0.5) {
+        Thread.sleep(forTimeInterval: settle) // let any animation finish before the capture
         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         shot.name = name
         shot.lifetime = .keepAlways
@@ -67,5 +67,21 @@ final class ScreenshotTests: XCTestCase {
         expectation(for: NSPredicate(format: "value == 'dimmed'"), evaluatedWith: red)
         waitForExpectations(timeout: 8)
         keep(app, "state-05-awaiting-play")
+    }
+
+    func testRewardStates() {
+        XCUIDevice.shared.orientation = .portrait
+        for streak in [5, 10, 15, 19] {
+            let app = launch(["-ElisaStreak", "\(streak)"])
+            _ = app.buttons["flag-red"].waitForExistence(timeout: 10)
+            keep(app, String(format: "state-06-streak-%02d-of-20", streak), settle: 1.5)
+        }
+        let app = launch(["-ElisaAnswer", "red", "-ElisaStreak", "19"])
+        let red = app.buttons["flag-red"]
+        _ = red.waitForExistence(timeout: 10)
+        app.buttons["play-button"].tap()
+        red.tap()
+        _ = app.buttons["flag-blue"].waitForExistence(timeout: 8)
+        keep(app, "state-07-after-level-up")
     }
 }
