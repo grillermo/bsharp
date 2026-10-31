@@ -21,6 +21,12 @@ struct Metrics {
     var arrowSize: CGFloat { clamp(5 * vh, 28.8, 48) }
     /// #flag-holder gap: clamp(6px, 1.5vmin, 14px)
     var flagGap: CGFloat { clamp(1.5 * vmin, 6, 14) }
+    /// div.hamburger a: clamp(40px, 10vmin, 56px) across, its gear clamp(24px, 6vmin, 3rem).
+    var gearSize: CGFloat { clamp(10 * vmin, 40, 56) }
+    var gearIconSize: CGFloat { clamp(6 * vmin, 24, 48) }
+    /// The five menu icons and the gaps between them (about 25 pt and 33 pt on the iPad mini).
+    var menuIconSize: CGFloat { clamp(3.4 * vmin, 20, 30) }
+    var menuSpacing: CGFloat { clamp(4.5 * vmin, 14, 44) }
 
     /// #character-reveal img height: portrait min(11vh, 130px), landscape min(30vh, 220px)
     var revealImageHeight: CGFloat { landscape ? min(30 * vh, 220) : min(11 * vh, 130) }

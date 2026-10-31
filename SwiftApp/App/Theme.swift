@@ -16,6 +16,8 @@ enum Theme {
     static let noteLetter = Color(hex: 0xDADADA)
     /// The outline and check of a right answer.
     static let correctGreen = Color(hex: 0x008000)
+    /// The menu item for what is on screen, and the current profile's ring (#0077be).
+    static let active = Color(hex: 0x0077BE)
 
     static func headline(_ size: CGFloat) -> Font { .custom("HelloHeadline", size: size) }
 
