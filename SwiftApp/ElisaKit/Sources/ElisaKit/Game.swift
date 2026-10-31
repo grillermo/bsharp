@@ -30,24 +30,37 @@ public struct Game {
     public private(set) var awaitingPlay = false
     /// The arrow up at the play button, shown when a level starts, until play is pressed.
     public private(set) var showsPlayHint = false
+    /// The character shown with the green check, from a right answer until `revealFinished()`.
+    public private(set) var character: String?
+    /// Whether the right answer on screen completed a streak of `Streak.target`, so the reveal
+    /// ends with a level-up.
+    public private(set) var levelUpDue = false
 
     private var weights: [Double]?
+    private var deck: CharacterDeck
     private let forcedAnswer: String?
+    private let startingStreak: Int?
     private let random: () -> Double
     private let now: () -> Double
 
-    /// `forcedAnswer` always asks that chord (the web app's test hook).
+    /// `forcedAnswer` always asks that chord (the web app's test hook); `startingStreak`
+    /// seeds the streak when the game starts (for UI tests and screenshots).
     public init(progress: SavedProgress,
                 forcedAnswer: String? = nil,
+                startingStreak: Int? = nil,
                 random: @escaping () -> Double = { Double.random(in: 0..<1) },
                 now: @escaping () -> Double = { Date().timeIntervalSince1970 }) {
         self.progress = progress
         self.forcedAnswer = forcedAnswer
+        self.startingStreak = startingStreak
         self.random = random
         self.now = now
+        deck = CharacterDeck(random: random)
     }
 
     public var profile: Profile { progress.profile }
+    /// Correct answers in a row at this level.
+    public var streak: Int { profile.streak ?? 0 }
     public var level: String { progress.state.currentChord }
     public var chords: [Chord] { Chords.inPlay(upTo: level) }
     public var instrument: Instrument { profile.instrument }
@@ -63,6 +76,9 @@ public struct Game {
     /// Opens the app: the web app's page-load housekeeping, then a first question, not played.
     public mutating func start() {
         progress.launch(now: now())
+        if let startingStreak {
+            progress.profile.streak = startingStreak
+        }
         newSession()
     }
 
@@ -93,21 +109,34 @@ public struct Game {
         guard marked == nil, asked else { return .sound }
         guard progress.recordAnswer(played: answer, chosen: color, now: now()) else { return .wrong }
         marked = color
+        character = deck.next()
+        levelUpDue = streak >= Streak.target
         return .correct
     }
 
-    /// The reveal is over: the next question is loaded, not played, and the flags dim until
-    /// play is pressed.
+    /// The reveal is over. A completed streak moves to the next level on the other instrument
+    /// (the new level starts like any level change, with the play hint); otherwise the next
+    /// question is loaded at the same level. Either way it is not played, and the flags dim
+    /// until play is pressed. At the last level a completed streak just starts over.
     public mutating func revealFinished() {
         guard marked != nil else { return }
-        marked = nil
-        newQuestion()
+        let leveledUp = levelUpDue && progress.levelUp(now: now()) != nil
+        if leveledUp {
+            newSession()
+        } else {
+            marked = nil
+            character = nil
+            levelUpDue = false
+            newQuestion()
+        }
         awaitingPlay = true
     }
 
     private mutating func newSession() {
         weights = nil
         marked = nil
+        character = nil
+        levelUpDue = false
         awaitingPlay = false
         newQuestion()
         showsPlayHint = profile.enableOnboardingHints
