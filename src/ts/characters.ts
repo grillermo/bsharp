@@ -66,6 +66,14 @@ export function isRevealing(): boolean {
 }
 
 let pending = false;
+let finishReveal: (() => void) | null = null;
+
+/** Ends a reveal now, hiding the character and running its onDone. False if none was running. */
+export function endReveal(): boolean {
+    if (!finishReveal) return false;
+    finishReveal();
+    return true;
+}
 
 /**
  * Shows a character and its name together, then hides it and calls onDone after REVEAL_MS.
@@ -81,17 +89,26 @@ export function revealCharacter(onDone: () => void): void {
     if (!source.src) source.src = characterUrl(name);
 
     pending = true;
+    let ended = false;
+    const finish = () => {
+        if (ended) return;
+        ended = true;
+        pending = false;
+        finishReveal = null;
+        if (hideTimer !== null) clearTimeout(hideTimer);
+        hideTimer = null;
+        box.classList.remove('visible');
+        onDone();
+    };
+    finishReveal = finish;
     const show = () => {
+        if (ended) return;
         pending = false;
         img.src = characterUrl(name);
         img.alt = label;
         (box.querySelector('.character-name') as HTMLElement).textContent = label;
         box.classList.add('visible');
-        hideTimer = setTimeout(() => {
-            hideTimer = null;
-            box.classList.remove('visible');
-            onDone();
-        }, REVEAL_MS);
+        hideTimer = setTimeout(finish, REVEAL_MS);
     };
     source.decode().then(show, show);
 }

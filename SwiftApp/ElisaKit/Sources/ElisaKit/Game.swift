@@ -96,8 +96,10 @@ public struct Game {
         newSession()
     }
 
-    /// Play pressed: returns the chord to sound.
+    /// Play pressed: returns the chord to sound. Pressed during a reveal, it ends the reveal
+    /// at once, so the next chord (or level) is the one that sounds and the flags are live.
     public mutating func play() -> String {
+        revealFinished()
         showsPlayHint = false
         awaitingPlay = false
         asked = true

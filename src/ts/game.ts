@@ -9,7 +9,7 @@ import {
 import { getCurrentCoefficients, updateStartTimeIfNeeded, updateStats, normalizeStatsObject } from './stats';
 import { getAudioFiles, audioFileElem, playChordFiles, preloadAudio } from './audio';
 import { populateFlags, updateStatsDisplay, resetCatEmoji, setCatEmoji, setChordDisplayMode, populateProfileUiElements } from './ui';
-import { revealCharacter, isRevealing } from './characters';
+import { revealCharacter, isRevealing, endReveal } from './characters';
 import { STREAK_TARGET, nextStreak, nextLevel, renderStreakOutline } from './streak';
 import { dismissOnboardingStep, showOnboardingGuessPrompt, showOnboardingPlayPrompt, completeOnboardingIdentification } from './onboarding';
 
@@ -116,6 +116,9 @@ export function populateAudio(): void {
 export function playAudio(): void {
     const playButton = document.getElementById('play-button');
     if (playButton && playButton.classList.contains('deactivated')) return;
+
+    // Play during a reveal ends it at once: the next chord is loaded and sounds now.
+    endReveal();
     if (!_CURRENT_AUDIO) return;
 
     dismissOnboardingStep('play');

@@ -89,6 +89,19 @@ final class GameTestClock {
         #expect(g.profile.streak == 2)
     }
 
+    @Test func playDuringTheRevealEndsItAndOpensTheFlags() {
+        var g = game()
+        _ = g.play()
+        _ = g.tap("red")
+        #expect(g.marked == "red")
+        _ = g.play()
+        #expect(g.marked == nil)
+        #expect(g.character == nil)
+        #expect(!g.awaitingPlay)
+        #expect(g.asked)
+        #expect(g.tap("red") == .correct)
+    }
+
     @Test func revealFinishedWithoutAnAnswerDoesNothing() {
         var g = game()
         g.revealFinished()

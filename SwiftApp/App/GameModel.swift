@@ -28,7 +28,13 @@ final class GameModel {
     }
 
     func play() {
-        player.play(game.play())
+        // Play pressed during a reveal ends it at once, and may level up.
+        revealTask?.cancel()
+        let level = game.level
+        let chord = game.play()
+        levelChanged(from: level)
+        player.play(chord)
+        save()
     }
 
     func tap(_ color: String) {
@@ -69,14 +75,16 @@ final class GameModel {
             guard !Task.isCancelled, let self else { return }
             let level = self.game.level
             self.game.revealFinished()
-            if self.game.level != level {
-                // A level-up switched the instrument.
-                self.player.load(self.game.instrument)
-                DevLog.event("game.level-up", ["level": self.game.level,
-                                               "instrument": self.game.instrument.rawValue])
-            }
+            self.levelChanged(from: level)
             self.save()
         }
+    }
+
+    private func levelChanged(from level: String) {
+        guard game.level != level else { return }
+        // A level-up switched the instrument.
+        player.load(game.instrument)
+        DevLog.event("game.level-up", ["level": game.level, "instrument": game.instrument.rawValue])
     }
 
     private func save() {
