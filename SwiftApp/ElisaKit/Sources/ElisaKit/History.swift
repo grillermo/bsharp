@@ -23,6 +23,13 @@ public struct HistoryRow: Equatable, Sendable {
     public let correct: Int
     public let answers: Int
 
+    public init(level: String, startTime: Double, correct: Int, answers: Int) {
+        self.level = level
+        self.startTime = startTime
+        self.correct = correct
+        self.answers = answers
+    }
+
     public var percent: Double {
         answers == 0 ? 0 : 100 * Double(correct) / Double(answers)
     }
