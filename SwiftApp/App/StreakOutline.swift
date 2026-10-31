@@ -23,9 +23,17 @@ struct StreakOutline: View {
                 shown = progress
             }
         }
-        .accessibilityElement()
-        .accessibilityIdentifier("streak-outline")
-        .accessibilityValue("\(streak)")
+        .accessibilityHidden(true)
+        // A full-screen accessibility element would shadow the hit testing of the scroll views
+        // under it (XCUITest reports their contents as not hittable), so the value lives on a
+        // one-point element in the corner.
+        .overlay(alignment: .topLeading) {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement()
+                .accessibilityIdentifier("streak-outline")
+                .accessibilityValue("\(streak)")
+        }
     }
 }
 
