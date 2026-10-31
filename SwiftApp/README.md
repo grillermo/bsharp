@@ -34,7 +34,8 @@ Screenshots to compare with `Reference Material/`: the same command with
 `xcrun xcresulttool export attachments --path build/shots.xcresult --output-path build/shots`.
 
 Launch arguments for testing: `-ElisaFreshState YES` (throwaway progress), `-ElisaLevel <chord
-id>`, `-ElisaAnswer <chord id>` (always ask that chord).
+id>`, `-ElisaAnswer <chord id>` (always ask that chord), `-ElisaStreak <n>` (start with that
+streak; `-ElisaLevel` starts a new streak, so it zeroes this one).
 
 ## Progress
 

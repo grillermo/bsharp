@@ -50,12 +50,12 @@ SwiftApp/
   .env                    ELISA_MUSICA_UPLOAD_BASE (gitignored)
   project.yml             XcodeGen source of truth; ElisaMusica.xcodeproj is generated
   App/                    SwiftUI app: ElisaMusicaApp, QuickActions, Theme, SkyBackground,
-                          TitleCard, HomeView, Fonts/, Assets.xcassets/
+                          TitleCard, HomeView, CharacterReveal, StreakOutline, Fonts/, Assets.xcassets/
   UITests/                main flows and screenshot tests (XCUITest)
   ElisaKit/               local Swift package (Sources/ElisaKit, Tests/ElisaKitTests):
                           Chords, Progression, AdaptiveWeights, CharacterDeck,
                           AppQuickAction, DevLog, SavedProgress, ProgressStore, Sessions,
-                          Game, ChordFiles, NoteDisplay, FlagLayout, TapUnlock
+                          Game, ChordFiles, NoteDisplay, FlagLayout, TapUnlock, Rewards
   Reference Material/
 ```
 
@@ -109,7 +109,7 @@ compared side by side.
    from `game.ts`, the green check, and the play-hint arrow on first run.
 7. **Note shapes (done).** The shapes and letters on black-key levels (`_note-shapes.scss`) as SwiftUI
    `Shape`s, honoring the three display settings. Compare `level-black-*`.
-8. **Rewards.** Character reveal for 3 s with the name pill, the streak outline as a trimmed
+8. **Rewards (done).** Character reveal for 3 s with the name pill, the streak outline as a trimmed
    rounded-rectangle stroke (0.9 s fill, 0.35 s unwind), and the level-up at 20 in a row.
    Compare `state-04` to `state-07`.
    **New: each level-up also switches the instrument,** piano → guitar → piano → guitar…,
