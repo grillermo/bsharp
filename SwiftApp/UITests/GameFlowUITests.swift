@@ -63,4 +63,60 @@ final class GameFlowUITests: XCTestCase {
         let flags = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'flag-'"))
         XCTAssertEqual(flags.count, 10)
     }
+
+    /// Any element with this accessibility id, whatever its type.
+    private func element(_ app: XCUIApplication, _ id: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(identifier: id).firstMatch
+    }
+
+    func testARightAnswerShowsACharacterForThreeSeconds() {
+        let app = launch()
+        let red = app.buttons["flag-red"]
+        XCTAssertTrue(red.waitForExistence(timeout: 10))
+        let character = element(app, "character-reveal")
+        XCTAssertFalse(character.exists)
+        app.buttons["play-button"].tap()
+
+        app.buttons["flag-yellow"].tap()
+        XCTAssertFalse(character.exists, "a wrong answer shows no character")
+
+        red.tap()
+        XCTAssertTrue(character.waitForExistence(timeout: 2))
+        XCTAssertFalse(character.label.isEmpty, "the character's name is shown")
+
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: character)
+        waitForExpectations(timeout: 8)
+    }
+
+    func testTheOutlineFollowsTheStreak() {
+        let app = launch(["-ElisaStreak", "7"])
+        let outline = element(app, "streak-outline")
+        XCTAssertTrue(outline.waitForExistence(timeout: 10))
+        XCTAssertEqual(value(outline), "7")
+        app.buttons["play-button"].tap()
+
+        app.buttons["flag-yellow"].tap()
+        XCTAssertEqual(value(outline), "0", "a miss starts the streak over")
+
+        app.buttons["flag-red"].tap()
+        XCTAssertEqual(value(outline), "1")
+    }
+
+    func testTwentyInARowMovesToTheNextLevel() {
+        let app = launch(["-ElisaStreak", "19"])
+        let red = app.buttons["flag-red"]
+        XCTAssertTrue(red.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["flag-blue"].exists)
+        app.buttons["play-button"].tap()
+        red.tap()
+
+        // After the reveal the next level starts: its flags show, dimmed, with the play hint.
+        XCTAssertTrue(app.buttons["flag-blue"].waitForExistence(timeout: 8))
+        XCTAssertEqual(value(red), "dimmed")
+        XCTAssertTrue(app.staticTexts["play-hint"].exists)
+        XCTAssertEqual(value(element(app, "streak-outline")), "0")
+
+        app.buttons["play-button"].tap()
+        XCTAssertEqual(value(red), "")
+    }
 }
