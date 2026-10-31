@@ -35,6 +35,18 @@ struct HomeView: View {
             }
             .padding(.horizontal, 10)
             .padding(.bottom, 10)
+            .overlay(alignment: .topTrailing) {
+                ZStack {
+                    if let name = model.game.character {
+                        CharacterReveal(name: name, metrics: metrics)
+                            .id(name)
+                            .padding(.top, metrics.revealTop)
+                            .padding(.trailing, metrics.revealTrailing)
+                            .transition(.opacity)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.25), value: model.game.character)
+            }
         }
         .background(SkyBackground())
         .overlay {
