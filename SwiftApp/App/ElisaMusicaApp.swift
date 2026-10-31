@@ -12,6 +12,10 @@ struct ElisaMusicaApp: App {
     var body: some Scene {
         WindowGroup {
             HomeView(model: model)
+                // Like an app in Guided Access: nothing at the edges to tap or drag by accident.
+                .statusBarHidden()
+                .persistentSystemOverlays(.hidden)
+                .defersSystemGestures(on: .all)
         }
     }
 }
