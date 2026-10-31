@@ -185,15 +185,33 @@ input, select { -webkit-user-select: auto; user-select: auto; }
         transform: scale(1) rotate(0);
     }
 
+    // The character sits centred in a white oval with a pale-blue ring, sized from --reveal-h.
+    --reveal-h: min(19vh, 140px);
+
+    .character-oval {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: min(calc(var(--reveal-h) * 2.05), 40vw);
+        aspect-ratio: 2.05 / 1.45;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 0 6px $bluey-edge, 0 8px 8px rgba(90, 90, 135, 0.35);
+    }
+
+    // Kept inside the oval: a centred box 36% wide and 66% tall, the picture fitted to it.
+    .character-oval { position: relative; }
     img {
-        height: min(30vh, 220px);
-        max-width: 38vw;
+        position: absolute;
+        inset: 17% 32%;
+        width: 36%;
+        height: 66%;
         object-fit: contain;
-        filter: drop-shadow(0 6px 6px rgba(90, 90, 135, 0.35));
     }
 
     .character-name {
-        margin-top: 0.25rem;
+        position: relative;
+        margin-top: -0.9rem;
         padding: 2px 18px 4px;
         background: #fff;
         border-radius: 20px;
@@ -208,7 +226,8 @@ input, select { -webkit-user-select: auto; user-select: auto; }
         top: calc(env(safe-area-inset-top) + 9vh);
         right: 0.75rem;
 
-        img { height: min(11vh, 130px); max-width: 28vw; }
+        --reveal-h: min(7vh, 80px);
+        .character-oval { width: min(calc(var(--reveal-h) * 2.05), 30vw); }
         .character-name { font-size: 1.3rem; }
     }
 }

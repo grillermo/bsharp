@@ -9,19 +9,22 @@ struct CharacterReveal: View {
     @State private var shown = false
 
     var body: some View {
-        VStack(spacing: 4) {
-            if let image = CharacterImages.image(name) {
-                Image(uiImage: image)
-                    .resizable()
-                    .interpolation(.high)
-                    .scaledToFit()
-                    // The img box is as wide as the picture at that height (capped by max-width),
-                    // so the character sits flush with `right` instead of centred in a wide box.
-                    .frame(width: min(metrics.revealImageHeight * image.size.width / max(image.size.height, 1),
-                                      metrics.revealImageMaxWidth),
-                           height: metrics.revealImageHeight)
-                    .shadow(color: Theme.ink.opacity(0.35), radius: 6, y: 6)
+        VStack(spacing: -14) {
+            // The character sits centred in a white oval with a 6 pt pale-blue ring; its box is
+            // 36% x 66% of the oval, so it never leaves the edge.
+            ZStack {
+                Ellipse().fill(.white)
+                if let image = CharacterImages.image(name) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .interpolation(.high)
+                        .scaledToFit()
+                        .frame(width: metrics.revealOvalWidth * 0.36, height: metrics.revealOvalHeight * 0.66)
+                }
             }
+            .frame(width: metrics.revealOvalWidth, height: metrics.revealOvalHeight)
+            .background(Ellipse().fill(Theme.edge).padding(-6))
+            .shadow(color: Theme.ink.opacity(0.35), radius: 6, y: 6)
             Text(Characters.label(name))
                 .font(Theme.headline(metrics.revealNameFont))
                 .foregroundStyle(Theme.ink)
@@ -31,6 +34,7 @@ struct CharacterReveal: View {
                 .background(RoundedRectangle(cornerRadius: 20).fill(.white))
                 // The 4 pt pale-blue ring (box-shadow: 0 0 0 4px $bluey-edge).
                 .background(RoundedRectangle(cornerRadius: 24).fill(Theme.edge).padding(-4))
+                .zIndex(1)
         }
         // transform: scale(0.6) rotate(-4deg) → none over 0.35 s on cubic-bezier(.3, 1.5, .5, 1),
         // and opacity over 0.25 s.

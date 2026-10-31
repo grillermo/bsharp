@@ -28,10 +28,12 @@ struct Metrics {
     var menuIconSize: CGFloat { clamp(3.4 * vmin, 20, 30) }
     var menuSpacing: CGFloat { clamp(4.5 * vmin, 14, 44) }
 
-    /// #character-reveal img height: portrait min(11vh, 130px), landscape min(30vh, 220px)
-    var revealImageHeight: CGFloat { landscape ? min(30 * vh, 220) : min(11 * vh, 130) }
-    /// img max-width: portrait 28vw, landscape 38vw
-    var revealImageMaxWidth: CGFloat { landscape ? 38 * vw : 28 * vw }
+    /// #character-reveal --reveal-h: portrait min(7vh, 80px), landscape min(19vh, 140px)
+    var revealHeight: CGFloat { landscape ? min(19 * vh, 140) : min(7 * vh, 80) }
+    /// .character-oval width: 2.05 x --reveal-h, capped at portrait 30vw, landscape 40vw
+    var revealOvalWidth: CGFloat { min(revealHeight * 2.05, landscape ? 40 * vw : 30 * vw) }
+    /// .character-oval aspect-ratio 2.05 / 1.45
+    var revealOvalHeight: CGFloat { revealOvalWidth / 2.05 * 1.45 }
     /// .character-name font: portrait 1.3rem, landscape 1.6rem
     var revealNameFont: CGFloat { landscape ? 25.6 : 20.8 }
     /// top: landscape 0.75rem. Portrait (9vh) stands the character on the flags instead, see HomeView.
