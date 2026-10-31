@@ -1,27 +1,17 @@
 import SwiftUI
 
-/// The round play and next buttons.
+/// The round play button. The web app's next button is not drawn: it was never enabled.
 struct ControlsBar: View {
     let buttonSize: CGFloat
     let iconSize: CGFloat
-    let spacing: CGFloat
     let onPlay: () -> Void
 
     var body: some View {
-        HStack(spacing: spacing) {
-            Button(action: onPlay) {
-                Image(systemName: "play.fill").font(.system(size: iconSize, weight: .black))
-            }
-            .buttonStyle(RoundButtonStyle(size: buttonSize))
-            .accessibilityIdentifier("play-button")
-            // The web app never enables its next button (game.ts only ever adds .deactivated),
-            // so it is drawn dimmed and does nothing.
-            RoundButtonFace(size: buttonSize, pressed: false) {
-                Image(systemName: "arrow.right").font(.system(size: iconSize, weight: .black))
-            }
-            .opacity(0.35)
-            .accessibilityHidden(true)
+        Button(action: onPlay) {
+            Image(systemName: "play.fill").font(.system(size: iconSize, weight: .black))
         }
+        .buttonStyle(RoundButtonStyle(size: buttonSize))
+        .accessibilityIdentifier("play-button")
     }
 }
 
