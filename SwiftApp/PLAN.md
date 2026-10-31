@@ -50,7 +50,7 @@ SwiftApp/
   .env                    ELISA_MUSICA_UPLOAD_BASE (gitignored)
   project.yml             XcodeGen source of truth; ElisaMusica.xcodeproj is generated
   App/                    SwiftUI app: ElisaMusicaApp, QuickActions, Theme, SkyBackground,
-                          TitleCard, HomeView, CharacterReveal, StreakOutline, Fonts/, Assets.xcassets/
+                          HomeView, CharacterReveal, StreakOutline, Fonts/, Assets.xcassets/
   UITests/                main flows and screenshot tests (XCUITest)
   ElisaKit/               local Swift package (Sources/ElisaKit, Tests/ElisaKitTests):
                           Chords, Progression, AdaptiveWeights, CharacterDeck,

@@ -9,9 +9,6 @@ struct Metrics {
     private var vmin: CGFloat { min(size.width, size.height) / 100 }
 
     var landscape: Bool { size.width > size.height }
-    var titleFont: CGFloat { TitleCard.fontSize(for: size) }
-    /// .title-card bottom margin: clamp(8px, 2vh, 20px)
-    var titleGap: CGFloat { clamp(2 * vh, 8, 20) }
     /// div.controls a: clamp(56px, min(14vmin, 11vh), 104px)
     var buttonSize: CGFloat { clamp(min(14 * vmin, 11 * vh), 56, 104) }
     /// div.controls i.fa: clamp(26px, min(6.5vmin, 5vh), 48px)

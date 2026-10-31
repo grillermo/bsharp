@@ -2,8 +2,8 @@ import ElisaKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// The main screen: title, play and next, the play hint and the flags. Six quick taps on the
-/// title open the parent-only progress import.
+/// The main screen: play and next, the play hint and the flags. Six quick taps on the strip
+/// at the top open the parent-only progress import.
 struct HomeView: View {
     let model: GameModel
     @Environment(\.scenePhase) private var scenePhase
@@ -16,9 +16,9 @@ struct HomeView: View {
         GeometryReader { geo in
             let metrics = Metrics(size: geo.size)
             VStack(spacing: 0) {
-                TitleCard(fontSize: metrics.titleFont)
-                    .padding(.top, 12)
-                    .padding(.bottom, metrics.titleGap)
+                Color.clear
+                    .frame(height: 44)
+                    .contentShape(Rectangle())
                     .onTapGesture {
                         if unlock.tap(at: Date().timeIntervalSince1970) { choosingFile = true }
                     }
