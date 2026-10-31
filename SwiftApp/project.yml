@@ -25,6 +25,10 @@ targets:
       - path: ../static/chords
         type: folder
         buildPhase: resources
+      # The web app's Bluey cut-outs, in the bundle at characters/<name>.png.
+      - path: ../static/characters
+        type: folder
+        buildPhase: resources
     scheme:
       testTargets:
         - ElisaMusicaUITests
