@@ -50,12 +50,12 @@ SwiftApp/
   .env                    ELISA_MUSICA_UPLOAD_BASE (gitignored)
   project.yml             XcodeGen source of truth; ElisaMusica.xcodeproj is generated
   App/                    SwiftUI app: ElisaMusicaApp, QuickActions, Theme, SkyBackground,
-                          HomeView, CharacterReveal, StreakOutline, Fonts/, Assets.xcassets/
+                          HomeView, CharacterReveal, StreakOutline, MenuBar, PanelCard, InfoPanel, TrainerPanel, HistoryPanel, ProfilePanel, GuidedAccessInfo, Fonts/, Assets.xcassets/
   UITests/                main flows and screenshot tests (XCUITest)
   ElisaKit/               local Swift package (Sources/ElisaKit, Tests/ElisaKitTests):
                           Chords, Progression, AdaptiveWeights, CharacterDeck,
                           AppQuickAction, DevLog, SavedProgress, ProgressStore, Sessions,
-                          Game, ChordFiles, NoteDisplay, FlagLayout, TapUnlock, Rewards
+                          Game, ChordFiles, NoteDisplay, FlagLayout, TapUnlock, Rewards, LevelOptions, ProfileIcons, Profiles, History, KeepAwake
   Reference Material/
 ```
 
@@ -117,9 +117,9 @@ compared side by side.
    manual choice. The settings form can still pick any instrument by hand; a level-up from
    strummed guitar goes to piano. At the last level there's no level-up, so no switch. Test
    it in Swift Testing next to the streak tests.
-9. **Menu and panels.** Gear menu, piano trainer, info text, stats history and the profile
+9. **Menu and panels (done).** Gear menu, piano trainer, info text, stats history and the profile
    settings form (multiple profiles, icons, all settings). Compare the `menu-*` screenshots.
-10. **iPad polish.** Safe areas, landscape, keeping the screen awake during a session
+10. **iPad polish (done).** Safe areas, landscape, keeping the screen awake during a session
     (`isIdleTimerDisabled`), Guided Access instead of the web app's screen-pinning info, and no
     accidental back or close gestures.
 11. **Switch Elisa over.** Deploy, move her progress over with the import from step 4, do a

@@ -43,9 +43,20 @@ Saved in `Application Support/ElisaMusica/progress.json`, in the same format as 
 state download. To bring progress over from https://bluey.chiq.me: in the web app, reveal the
 hidden download link by calling `enable_download()` six times in a row in the browser console
 (under 1.5 s between calls; nothing in the page calls it yet), then tap the download link that
-appears (`#download-link`, or call `download_state()` in the console); get the file onto the iPad (AirDrop to Files); in this app tap the title six
-times quickly, pick the file and tap **Reemplazar**. The previous progress is kept beside it as
+appears (`#download-link`, or call `download_state()` in the console); get the file onto the iPad (AirDrop to Files); in this app tap the empty part of the top bar (left of the gear) six times quickly, pick the file and tap **Reemplazar**. The previous progress is kept beside it as
 `progress.before-import-<time>.json`.
+
+## Menu
+
+The gear at the top right shows home, the piano trainer, the info text, the stats history and
+the profile (icon and name). Panels take the place of the game until home is tapped or the
+menu is hidden. In the profile panel, level and instrument apply at once; the other settings
+apply with **Guardar**. Six quick taps on "rojo" in the info text unlock level 0 (red) in the
+level picker until the app quits.
+
+The app hides the status bar and home indicator, defers edge swipes, and keeps the screen on
+until five minutes after the last play or tap. To lock the iPad to the app, use Guided Access
+(profile panel → **Fijar pantalla → Info**).
 
 ## Setup on a new machine
 
