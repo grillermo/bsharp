@@ -2,7 +2,7 @@ import ElisaKit
 import Foundation
 
 /// Launch arguments for UI tests and screenshots, e.g.
-/// `-ElisaFreshState YES -ElisaLevel gray -ElisaAnswer red`. A normal launch has none.
+/// `-ElisaFreshState YES -ElisaLevel gray -ElisaAnswer red -ElisaStreak 7`. A normal launch has none.
 struct LaunchOptions {
     /// Start at this level (a chord id).
     var level: String?
@@ -10,11 +10,15 @@ struct LaunchOptions {
     var answer: String?
     /// Play on a throwaway progress file, so a test never touches real progress.
     var freshState = false
+    /// Start with this streak. `-ElisaLevel` starts a new streak, so it zeroes this one.
+    var streak: Int?
 
     static func current(_ defaults: UserDefaults = .standard) -> LaunchOptions {
         LaunchOptions(level: defaults.string(forKey: "ElisaLevel"),
                       answer: defaults.string(forKey: "ElisaAnswer"),
-                      freshState: defaults.bool(forKey: "ElisaFreshState"))
+                      freshState: defaults.bool(forKey: "ElisaFreshState"),
+                      streak: defaults.object(forKey: "ElisaStreak") == nil
+                          ? nil : defaults.integer(forKey: "ElisaStreak"))
     }
 
     /// Where progress is kept. A fresh state gets a new temporary file on every call, so read
