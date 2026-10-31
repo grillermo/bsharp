@@ -84,4 +84,38 @@ final class ScreenshotTests: XCTestCase {
         _ = app.buttons["flag-blue"].waitForExistence(timeout: 8)
         keep(app, "state-07-after-level-up")
     }
+
+    func testMenus() {
+        let orientations: [(String, UIDeviceOrientation)] = UIDevice.current.userInterfaceIdiom == .pad
+            ? [("portrait", .portrait), ("landscape", .landscapeLeft)]
+            : [("portrait", .portrait)]
+        for (name, orientation) in orientations {
+            self.orientation = orientation
+            XCUIDevice.shared.orientation = orientation
+            let app = launch(["-ElisaAnswer", "red"])
+            _ = app.buttons["menu-gear"].waitForExistence(timeout: 10)
+            // One filed session for the history: answer at yellow, then move to blue.
+            app.buttons["play-button"].tap()
+            app.buttons["flag-red"].tap()
+            app.buttons["menu-gear"].tap()
+            app.buttons["menu-profile"].tap()
+            app.buttons["profile-level"].tap()
+            app.buttons["Nivel 2: Azul (Si Re Sol)"].tap()
+            app.buttons["menu-home"].tap()
+            keep(app, "menu-01-gear-open-\(name)")
+            app.buttons["menu-trainer"].tap()
+            keep(app, "menu-02-piano-trainer-\(name)")
+            app.buttons["menu-info"].tap()
+            keep(app, "menu-03-info-\(name)")
+            app.buttons["menu-history"].tap()
+            keep(app, "menu-04-stats-history-\(name)")
+            app.buttons["menu-profile"].tap()
+            keep(app, "menu-05-profile-settings-\(name)")
+            app.swipeUp()
+            keep(app, "menu-06-profile-settings-scrolled-\(name)")
+            app.buttons["profile-guided-access"].tap()
+            keep(app, "menu-07-guided-access-\(name)")
+        }
+        XCUIDevice.shared.orientation = .portrait
+    }
 }

@@ -8,6 +8,8 @@ struct PillButtonStyle: ButtonStyle {
         configuration.label
             .font(Theme.headline(20))
             .foregroundStyle(.white)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
             .padding(.horizontal, 24)
             .padding(.vertical, 10)
             .background(Capsule().fill(configuration.isPressed ? Theme.inkPressed : Theme.ink))
