@@ -96,6 +96,16 @@ public struct Game {
         newSession()
     }
 
+    /// A change from the menu (profiles, settings, the instrument), given the clock. Then the
+    /// game starts afresh, as after a level change: a new unplayed question, and the hint if
+    /// the profile has it on. A change that throws leaves everything as it was.
+    public mutating func editProgress(_ change: (inout SavedProgress, Double) throws -> Void) rethrows {
+        var edited = progress
+        try change(&edited, now())
+        progress = edited
+        newSession()
+    }
+
     /// Play pressed: returns the chord to sound. Pressed during a reveal, it ends the reveal
     /// at once, so the next chord (or level) is the one that sounds and the flags are live.
     public mutating func play() -> String {
