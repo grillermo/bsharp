@@ -36,7 +36,7 @@ struct Metrics {
     var revealNameFont: CGFloat { landscape ? 25.6 : 20.8 }
     /// top: landscape 0.75rem. Portrait (9vh) stands the character on the flags instead, see HomeView.
     var revealTop: CGFloat { landscape ? 12 : 9 * vh }
-    /// right: portrait 0.75rem, landscape 6.5rem (clear of the gear Plan 4 adds)
+    /// right: portrait 0.75rem, landscape 6.5rem
     var revealTrailing: CGFloat { landscape ? 104 : 12 }
 
     private func clamp(_ value: CGFloat, _ low: CGFloat, _ high: CGFloat) -> CGFloat {
