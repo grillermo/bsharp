@@ -60,6 +60,7 @@ final class ScreenshotTests: XCTestCase {
         keep(app, "state-01-first-run-play-hint")
         app.buttons["play-button"].tap()
         keep(app, "state-02-chord-playing")
+        app.waitForTheChord()
         app.buttons["flag-yellow"].tap()
         keep(app, "state-03-wrong-answer")
         red.tap()
@@ -79,7 +80,7 @@ final class ScreenshotTests: XCTestCase {
         let app = launch(["-ElisaAnswer", "red", "-ElisaStreak", "19"])
         let red = app.buttons["flag-red"]
         _ = red.waitForExistence(timeout: 10)
-        app.buttons["play-button"].tap()
+        app.playAndListen()
         red.tap()
         _ = app.buttons["flag-blue"].waitForExistence(timeout: 8)
         keep(app, "state-07-after-level-up")
@@ -95,7 +96,7 @@ final class ScreenshotTests: XCTestCase {
             let app = launch(["-ElisaAnswer", "red"])
             _ = app.buttons["menu-gear"].waitForExistence(timeout: 10)
             // One filed session for the history: answer at yellow, then move to blue.
-            app.buttons["play-button"].tap()
+            app.playAndListen()
             app.buttons["flag-red"].tap()
             app.buttons["menu-gear"].tap()
             app.buttons["menu-profile"].tap()

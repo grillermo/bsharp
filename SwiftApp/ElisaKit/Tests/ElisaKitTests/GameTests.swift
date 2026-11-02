@@ -49,6 +49,7 @@ final class GameTestClock {
     @Test func aWrongAnswerCountsAndSheKeepsGuessing() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         let wrong = g.tap("yellow")
         #expect(wrong == .wrong)
         #expect(g.marked == nil)
@@ -59,21 +60,42 @@ final class GameTestClock {
         #expect(right == .correct)
     }
 
-    @Test func theRightAnswerIsMarkedAndFurtherTapsOnlySound() {
+    @Test func theRightAnswerLocksTheFlags() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         let right = g.tap("red")
         #expect(right == .correct)
         #expect(g.marked == "red")
         #expect(g.profile.streak == 1)
+        #expect(g.flagsLocked)
         let after = g.tap("yellow")
-        #expect(after == .sound)
+        #expect(after == .ignored)
         #expect(g.profile.stats.identifications == 1)
+    }
+
+    @Test func theFlagsStayLockedUntilTheChordHasSounded() {
+        var g = game()
+        _ = g.play()
+        #expect(g.flagsLocked)
+        #expect(g.tap("red") == .ignored)
+        #expect(g.profile.stats.identifications == 0)
+        g.chordFinished()
+        #expect(!g.flagsLocked)
+        #expect(g.tap("red") == .correct)
+    }
+
+    @Test func aLevelChangeWhileTheChordSoundsOpensTheFlags() {
+        var g = game()
+        _ = g.play()
+        g.changeLevel(to: "blue")
+        #expect(!g.flagsLocked)
     }
 
     @Test func afterTheRevealTheFlagsWaitForPlay() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         _ = g.tap("red")
         g.revealFinished()
         #expect(g.marked == nil)
@@ -84,6 +106,8 @@ final class GameTestClock {
         #expect(ignored == .ignored)
         _ = g.play()
         #expect(!g.awaitingPlay)
+        #expect(g.flagsLocked, "still locked while the chord sounds")
+        g.chordFinished()
         let right = g.tap("red")
         #expect(right == .correct)
         #expect(g.profile.streak == 2)
@@ -92,9 +116,11 @@ final class GameTestClock {
     @Test func playDuringTheRevealEndsItAndOpensTheFlags() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         _ = g.tap("red")
         #expect(g.marked == "red")
         _ = g.play()
+        g.chordFinished()
         #expect(g.marked == nil)
         #expect(g.character == nil)
         #expect(!g.awaitingPlay)
@@ -130,6 +156,7 @@ final class GameTestClock {
     @Test func changingLevelShowsItsFlagsAndTheHintAgain() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         _ = g.tap("red")
         g.changeLevel(to: "gray")
         #expect(g.level == "gray")
@@ -148,6 +175,7 @@ final class GameTestClock {
     @Test func comingBackAfterHalfAnHourStartsANewSession() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         _ = g.tap("red")
         clock.now += 31 * 60
         g.becameActive()
@@ -160,6 +188,7 @@ final class GameTestClock {
     @Test func comingBackSoonChangesNothing() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         clock.now += 60
         g.becameActive()
         #expect(g.asked)
@@ -179,6 +208,7 @@ final class GameTestClock {
         var g = game(progress, answer: "gray")
         #expect(g.noteStyle == nil)
         _ = g.play()
+        g.chordFinished()
         _ = g.tap("gray")
         #expect(g.noteStyle != nil)
     }

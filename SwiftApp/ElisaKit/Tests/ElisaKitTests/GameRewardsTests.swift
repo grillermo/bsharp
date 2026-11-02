@@ -23,12 +23,14 @@ import Testing
     /// Presses play and answers red, the right answer.
     private func answerRight(_ g: inout Game) {
         _ = g.play()
+        g.chordFinished()
         _ = g.tap("red")
     }
 
     @Test func aRightAnswerDealsACharacterUntilTheRevealEnds() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         let wrong = g.tap("yellow")
         #expect(wrong == .wrong)
         #expect(g.character == nil)
@@ -56,6 +58,7 @@ import Testing
         #expect(g.streak == 1)
         g.revealFinished()
         _ = g.play()
+        g.chordFinished()
         let wrong = g.tap("yellow")
         #expect(wrong == .wrong)
         #expect(g.streak == 0)

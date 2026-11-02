@@ -14,6 +14,7 @@ import Testing
     @Test func anEditStartsANewUnplayedQuestion() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         #expect(g.asked)
         g.editProgress { progress, _ in progress.profile.currentInstrument = Instrument.guitar.rawValue }
         #expect(g.instrument == .guitar)
@@ -30,6 +31,7 @@ import Testing
     @Test func aFailedEditChangesNothing() {
         var g = game()
         _ = g.play()
+        g.chordFinished()
         do {
             try g.editProgress { progress, now in try progress.deleteProfile(id: 100, now: now) }
             Issue.record("the guest can't be deleted")

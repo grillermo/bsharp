@@ -30,7 +30,7 @@ struct HomeView: View {
                         .padding(.bottom, 6)
                 } else {
                     FlagGrid(chords: model.game.chords, landscape: metrics.landscape, gap: metrics.flagGap,
-                             marked: model.game.marked, dimmed: model.game.awaitingPlay,
+                             marked: model.game.marked, dimmed: model.game.flagsLocked,
                              noteStyle: model.game.noteStyle, onTap: { model.tap($0) })
                         .padding(.bottom, metrics.controlsGap)
                     if model.game.showsPlayHint {

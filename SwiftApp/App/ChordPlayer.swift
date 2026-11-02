@@ -51,21 +51,24 @@ final class ChordPlayer {
         ])
     }
 
-    /// Cuts off whatever is sounding and plays one take of `color`, picked at random.
-    func play(_ color: String) {
-        guard let take = takes[color]?.randomElement() else { return }
+    /// Cuts off whatever is sounding and plays one take of `color`, picked at random. Returns
+    /// how long that take lasts, or nil when nothing sounded.
+    @discardableResult
+    func play(_ color: String) -> TimeInterval? {
+        guard let take = takes[color]?.randomElement() else { return nil }
         let started = CACurrentMediaTime()
         // An interruption (a call, Siri) or a route change stops the engine.
         if !engine.isRunning { startEngine() }
         // Playing a node on a stopped engine raises an Objective-C exception, so stay silent.
         guard engine.isRunning else {
             DevLog.event("audio.play-skipped", ["color": color])
-            return
+            return nil
         }
         player.stop()
         player.scheduleBuffer(take, completionHandler: nil)
         player.play()
         DevLog.event("audio.play", ["color": color, "scheduleMs": Self.ms(CACurrentMediaTime() - started)])
+        return Double(take.frameLength) / take.format.sampleRate + AVAudioSession.sharedInstance().outputLatency
     }
 
     private func startEngine() {

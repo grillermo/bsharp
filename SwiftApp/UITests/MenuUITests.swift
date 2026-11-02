@@ -82,7 +82,7 @@ final class MenuUITests: XCTestCase {
         XCTAssertTrue(element(app, "history-empty").exists)
 
         open(app, "menu-home")
-        app.buttons["play-button"].tap()
+        app.playAndListen()
         app.buttons["flag-red"].tap()
         // A level change files the session at yellow.
         open(app, "menu-profile")

@@ -73,9 +73,10 @@ struct FlagView: View {
                         .padding(-4)
                 }
             }
-            // #flag-holder.awaiting-play .flag: grayscale(1), opacity 0.4.
-            .grayscale(dimmed ? 1 : 0)
-            .opacity(dimmed ? 0.4 : 1)
+            // #flag-holder.awaiting-play .flag: grayscale(1), opacity 0.4. The right answer
+            // keeps its color under the check.
+            .grayscale(dimmed && !marked ? 1 : 0)
+            .opacity(dimmed && !marked ? 0.4 : 1)
     }
 }
 

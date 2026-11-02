@@ -38,12 +38,17 @@ final class GameFlowUITests: XCTestCase {
         let yellow = app.buttons["flag-yellow"]
         XCTAssertTrue(red.waitForExistence(timeout: 10))
         app.buttons["play-button"].tap()
+        XCTAssertEqual(value(red), "dimmed", "the flags wait while the chord sounds")
+        yellow.tap()
+        XCTAssertEqual(value(yellow), "dimmed", "a tap while it sounds does nothing")
+        app.waitForTheChord()
 
         yellow.tap()
         XCTAssertEqual(value(yellow), "", "a wrong answer isn't marked")
 
         red.tap()
         XCTAssertEqual(value(red), "correct")
+        XCTAssertEqual(value(yellow), "dimmed", "the right answer locks the other flags")
 
         // After the 3 s reveal the next chord waits for play: dimmed, and a tap does nothing.
         expectation(for: NSPredicate(format: "value == 'dimmed'"), evaluatedWith: red)
@@ -51,8 +56,7 @@ final class GameFlowUITests: XCTestCase {
         red.tap()
         XCTAssertEqual(value(red), "dimmed")
 
-        app.buttons["play-button"].tap()
-        XCTAssertEqual(value(red), "")
+        app.playAndListen()
         red.tap()
         XCTAssertEqual(value(red), "correct")
     }
@@ -75,7 +79,7 @@ final class GameFlowUITests: XCTestCase {
         XCTAssertTrue(red.waitForExistence(timeout: 10))
         let character = element(app, "character-reveal")
         XCTAssertFalse(character.exists)
-        app.buttons["play-button"].tap()
+        app.playAndListen()
 
         app.buttons["flag-yellow"].tap()
         XCTAssertFalse(character.exists, "a wrong answer shows no character")
@@ -93,7 +97,7 @@ final class GameFlowUITests: XCTestCase {
         let outline = element(app, "streak-outline")
         XCTAssertTrue(outline.waitForExistence(timeout: 10))
         XCTAssertEqual(value(outline), "7")
-        app.buttons["play-button"].tap()
+        app.playAndListen()
 
         app.buttons["flag-yellow"].tap()
         XCTAssertEqual(value(outline), "0", "a miss starts the streak over")
@@ -107,7 +111,7 @@ final class GameFlowUITests: XCTestCase {
         let red = app.buttons["flag-red"]
         XCTAssertTrue(red.waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["flag-blue"].exists)
-        app.buttons["play-button"].tap()
+        app.playAndListen()
         red.tap()
 
         // After the reveal the next level starts: its flags show, dimmed, with the play hint.
@@ -116,7 +120,21 @@ final class GameFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["play-hint"].exists)
         XCTAssertEqual(value(element(app, "streak-outline")), "0")
 
-        app.buttons["play-button"].tap()
-        XCTAssertEqual(value(red), "")
+        app.playAndListen()
+    }
+}
+
+extension XCUIApplication {
+    /// Presses play and waits for the chord to finish sounding, when the flags open.
+    func playAndListen() {
+        buttons["play-button"].tap()
+        waitForTheChord()
+    }
+
+    /// The flags stay dimmed while the chord sounds (up to about 3 s for a long piano take).
+    func waitForTheChord() {
+        let flag = buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'flag-'")).firstMatch
+        let open = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value != 'dimmed'"), object: flag)
+        XCTAssertEqual(XCTWaiter.wait(for: [open], timeout: 8), .completed, "the flags open after the chord")
     }
 }

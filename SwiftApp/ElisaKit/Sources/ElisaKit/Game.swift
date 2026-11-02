@@ -2,10 +2,9 @@ import Foundation
 
 /// What a flag tap did.
 public enum TapOutcome: Equatable, Sendable {
-    /// The flags are dimmed until play is pressed: nothing happens, not even a sound.
+    /// The flags are locked (see `Game.flagsLocked`): nothing happens, not even a sound.
     case ignored
-    /// The chord sounds but isn't an answer: nothing has been asked yet, or the right answer
-    /// is already in.
+    /// The chord sounds but isn't an answer: nothing has been asked yet.
     case sound
     /// A wrong answer: the chord sounds, the miss counts, and she keeps guessing.
     case wrong
@@ -28,6 +27,9 @@ public struct Game {
     public private(set) var marked: String?
     /// After the reveal the next chord waits for play, and the flags are dimmed meanwhile.
     public private(set) var awaitingPlay = false
+    /// The asked chord is still sounding after play, so the flags wait for it to end
+    /// (`chordFinished()`).
+    public private(set) var chordSounding = false
     /// The arrow up at the play button, shown when a level starts, until play is pressed.
     public private(set) var showsPlayHint = false
     /// The character shown with the green check, from a right answer until `revealFinished()`.
@@ -64,6 +66,10 @@ public struct Game {
     public var level: String { progress.state.currentChord }
     public var chords: [Chord] { Chords.inPlay(upTo: level) }
     public var instrument: Instrument { profile.instrument }
+
+    /// The flags are greyed out and taps do nothing: from a right answer until play is pressed
+    /// again and the chord it plays has finished sounding, so she listens before she answers.
+    public var flagsLocked: Bool { marked != nil || awaitingPlay || chordSounding }
 
     /// How the flags show their notes now, or nil when they show none.
     public var noteStyle: NoteDisplay.Style? {
@@ -107,18 +113,25 @@ public struct Game {
     }
 
     /// Play pressed: returns the chord to sound. Pressed during a reveal, it ends the reveal
-    /// at once, so the next chord (or level) is the one that sounds and the flags are live.
+    /// at once, so the next chord (or level) is the one that sounds. The flags stay locked
+    /// until the caller reports the chord has finished with `chordFinished()`.
     public mutating func play() -> String {
         revealFinished()
         showsPlayHint = false
         awaitingPlay = false
+        chordSounding = true
         asked = true
         return answer
     }
 
+    /// The chord that play sounded has ended: the flags open for an answer.
+    public mutating func chordFinished() {
+        chordSounding = false
+    }
+
     public mutating func tap(_ color: String) -> TapOutcome {
-        if awaitingPlay { return .ignored }
-        guard marked == nil, asked else { return .sound }
+        if flagsLocked { return .ignored }
+        guard asked else { return .sound }
         guard progress.recordAnswer(played: answer, chosen: color, now: now()) else { return .wrong }
         marked = color
         character = deck.next()
@@ -150,6 +163,7 @@ public struct Game {
         character = nil
         levelUpDue = false
         awaitingPlay = false
+        chordSounding = false
         newQuestion()
         showsPlayHint = profile.enableOnboardingHints
     }

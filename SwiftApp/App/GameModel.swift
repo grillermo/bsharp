@@ -11,6 +11,7 @@ final class GameModel {
     private let store: ProgressStore
     private let player = ChordPlayer()
     private var revealTask: Task<Void, Never>?
+    private var unlockTask: Task<Void, Never>?
 
     /// Level 0 (red) in the level picker, unlocked by six quick taps on "rojo" in the info
     /// panel. Like the web app, only until the app quits.
@@ -41,9 +42,23 @@ final class GameModel {
         let level = game.level
         let chord = game.play()
         levelChanged(from: level)
-        player.play(chord)
+        scheduleUnlock(after: player.play(chord))
         save()
         noteActivity()
+    }
+
+    /// The flags open once the chord has sounded to the end (at once if it didn't sound).
+    private func scheduleUnlock(after duration: TimeInterval?) {
+        unlockTask?.cancel()
+        guard let duration else {
+            game.chordFinished()
+            return
+        }
+        unlockTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(duration))
+            guard !Task.isCancelled, let self else { return }
+            self.game.chordFinished()
+        }
     }
 
     func tap(_ color: String) {
