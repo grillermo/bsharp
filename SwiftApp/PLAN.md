@@ -109,8 +109,8 @@ compared side by side.
    from `game.ts`, the green check, and the play-hint arrow on first run.
 7. **Note shapes (done).** The shapes and letters on black-key levels (`_note-shapes.scss`) as SwiftUI
    `Shape`s, honoring the three display settings. Compare `level-black-*`.
-8. **Rewards (done).** Character reveal for 3 s with the name pill, the streak outline as a trimmed
-   rounded-rectangle stroke (0.9 s fill, 0.35 s unwind), and the level-up at 20 in a row.
+8. **Rewards (done).** Character reveal for 3 s with the name pill, the streak snake round the screen
+   edge (`SnakeLayout`; 0.9 s growth, 0.35 s unwind), and the level-up at 20 in a row.
    Compare `state-04` to `state-07`.
    **New: each level-up also switches the instrument,** piano → guitar → piano → guitar…,
    so every new level starts on the other instrument. It's saved in the profile like a

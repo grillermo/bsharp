@@ -17,7 +17,10 @@ struct HomeView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let metrics = Metrics(size: geo.size)
+            // The snake runs along the screen edge, so the app shrinks to leave it room and air.
+            let insets = snakeInsets(geo.safeAreaInsets)
+            let metrics = Metrics(size: CGSize(width: geo.size.width - insets.leading - insets.trailing,
+                                               height: geo.size.height - insets.top - insets.bottom))
             VStack(spacing: 0) {
                 topBar(metrics)
                     .padding(.bottom, metrics.controlsGap)
@@ -48,6 +51,7 @@ struct HomeView: View {
                         .padding(.trailing, metrics.revealTrailing)
                 }
             }
+            .padding(insets)
         }
         .background(SkyBackground())
         .overlay {
@@ -72,6 +76,13 @@ struct HomeView: View {
         } message: {
             Text(importError ?? "")
         }
+    }
+
+    private func snakeInsets(_ safeArea: EdgeInsets) -> EdgeInsets {
+        EdgeInsets(top: SnakeLayout.contentInset(safeArea: safeArea.top),
+                   leading: SnakeLayout.contentInset(safeArea: safeArea.leading),
+                   bottom: SnakeLayout.contentInset(safeArea: safeArea.bottom),
+                   trailing: SnakeLayout.contentInset(safeArea: safeArea.trailing))
     }
 
     /// The character reveal, faded in and out as the right answer's character comes and goes.
