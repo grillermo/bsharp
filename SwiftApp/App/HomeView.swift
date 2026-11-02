@@ -55,7 +55,7 @@ struct HomeView: View {
         }
         .background(SkyBackground())
         .overlay {
-            StreakOutline(streak: model.game.streak).ignoresSafeArea()
+            StreakOutline(streak: model.game.streak)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { model.becameActive() }

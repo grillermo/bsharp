@@ -37,11 +37,19 @@ public struct SnakeLayout: Sendable {
     static let segmentLength = 200.0
     static let cornerSize = 180.0
     static let headLength = 272.0
+    /// Half the width of a portrait iPhone's notch or Dynamic Island, in points, plus a hair of
+    /// air. The 16e's notch is about 162 points wide; the island is narrower, so this clears both.
+    public static let cutoutGap = 82.0
+    /// How far the head's tongue may slip under the cutout when the snake is full (art units):
+    /// the face stays clear, and a narrow phone's top edge is a few points short of a whole head.
+    static let tongueOverrun = 24.0
     /// Stretches every segment a touch so neighbours overlap instead of showing a hairline.
     private static let overlap = 0.003
 
     /// Points per unit of the art.
     public let scale: Double
+    /// How far either side of the top centre the snake stops short.
+    public let gap: Double
     public let tail: Piece
     /// Every body piece of a full circle, in order; a view reveals them behind the head.
     public let body: [Piece]
@@ -66,9 +74,12 @@ public struct SnakeLayout: Sendable {
         var radius: Double?
     }
 
-    public init(width: Double, height: Double, thickness: Double) {
+    /// `gap` is how far either side of the top centre the snake keeps away, so that it starts and
+    /// ends beside the camera cutout instead of under it.
+    public init(width: Double, height: Double, thickness: Double, gap: Double = 0) {
         let scale = thickness / 100
         self.scale = scale
+        self.gap = gap
         self.width = width
         self.height = height
         let corner = Self.cornerSize * scale
@@ -76,11 +87,11 @@ public struct SnakeLayout: Sendable {
         let headLength = Self.headLength * scale
         let segment = Self.segmentLength * scale
         let edges: [(length: Double, start: Double, last: Bool, at: (Double) -> (Double, Double), rotation: Double)] = [
-            (width / 2 - corner, tailLength, false, { (width / 2 + $0, 0) }, 0),
+            (width / 2 - gap - corner, tailLength, false, { (width / 2 + gap + $0, 0) }, 0),
             (height - 2 * corner, 0, false, { (width, corner + $0) }, 90),
             (width - 2 * corner, 0, false, { (width - corner - $0, height) }, 180),
             (height - 2 * corner, 0, false, { (0, height - corner - $0) }, 270),
-            (width / 2 - corner, 0, true, { (corner + $0, 0) }, 0),
+            (width / 2 - gap - corner, 0, true, { (corner + $0, 0) }, 0),
         ]
         let corners: [(Double, Double, Double)] = [
             (width - corner, 0, 0), (width, height - corner, 90), (corner, height, 180), (0, corner, 270),
@@ -97,12 +108,15 @@ public struct SnakeLayout: Sendable {
             lines.append(Line(start: travelled, length: edge.length, x: startX - sin(turn) * half,
                               y: startY + cos(turn) * half, degrees: edge.rotation))
             let room = edge.length - edge.start - (edge.last ? headLength : 0)
-            let count = max(0, Int((room / segment).rounded()))
+            // A short edge beside a cutout can leave less than half a segment; one squeezed segment
+            // still closes the hole.
+            let count = room > 0.01 ? max(1, Int((room / segment).rounded())) : 0
             let step = count > 0 ? room / Double(count) : 0
             var along = edge.start
             for number in 0...count {
                 let (x, y) = edge.at(along)
-                if along + headLength <= edge.length + 0.01 { stops.append(travelled + along) }
+                let overrun = edge.last && gap > 0 ? Self.tongueOverrun * scale : 0
+                if along + headLength <= edge.length + overrun + 0.01 { stops.append(travelled + along) }
                 if number < count {
                     let stretch = step / segment + Self.overlap
                     body.append(Piece(kind: .segment, x: x, y: y, rotation: edge.rotation, stretch: stretch))
@@ -122,7 +136,7 @@ public struct SnakeLayout: Sendable {
                 travelled += length
             }
         }
-        self.tail = Piece(kind: .tail, x: width / 2, y: 0, rotation: 0, stretch: 1)
+        self.tail = Piece(kind: .tail, x: width / 2 + gap, y: 0, rotation: 0, stretch: 1)
         self.body = body
         self.stops = stops
         self.lines = lines

@@ -64,6 +64,32 @@ import Testing
         #expect(abs(head.y) < 0.01)
     }
 
+    /// Portrait iPhones with a notch or island: the 16e and the widest Pro Max.
+    static let notched: [Double] = [390, 440]
+
+    @Test(arguments: notched) func theSnakeStaysBesideTheCutout(width: Double) {
+        let layout = SnakeLayout(width: width, height: 844, thickness: 26, gap: SnakeLayout.cutoutGap)
+        let cutout = (width / 2 - 81)...(width / 2 + 81)
+        #expect(layout.tail.x >= cutout.upperBound)
+        for index in layout.body.indices where layout.body[index].y < 1 && layout.body[index].rotation == 0 {
+            let piece = layout.body[index]
+            #expect(!cutout.overlaps(piece.x...(piece.x + 200 * layout.scale * piece.stretch - 0.01)))
+        }
+        // When full, only the tip of the tongue may slip under it.
+        let full = layout.head(atDistance: layout.distance(atStop: Double(layout.lastStop)))
+        #expect(abs(full.rotation) < 0.01 && abs(full.y) < 0.01)
+        let face = full.x + 210 * layout.scale
+        #expect(face <= cutout.lowerBound)
+    }
+
+    @Test(arguments: notched) func everyHitGrowsTheSnakeBesideTheCutout(width: Double) {
+        let layout = SnakeLayout(width: width, height: 844, thickness: 26, gap: SnakeLayout.cutoutGap)
+        let stops = (0...Streak.target).map { layout.stop(forProgress: Streak.progress($0)) }
+        for (before, after) in zip(stops, stops.dropFirst()) {
+            #expect(after > before)
+        }
+    }
+
     @Test func aStreakPastTheTargetStaysFull() {
         let layout = SnakeLayout(width: 390, height: 844, thickness: 26)
         #expect(layout.stop(forProgress: Streak.progress(35)) == layout.lastStop)
