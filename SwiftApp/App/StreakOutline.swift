@@ -5,26 +5,19 @@ import SwiftUI
 /// (SnakeLayout). A hit grows it slowly, a miss unwinds it fast.
 struct StreakOutline: View {
     let streak: Int
-    /// The head's stop now; it steps towards the streak's stop.
-    @State private var shown = 0
+    /// The share of the stops the head has passed; it animates towards the streak's stop.
+    @State private var shown = 0.0
 
     var body: some View {
         GeometryReader { geo in
             let layout = SnakeLayout(width: geo.size.width, height: geo.size.height,
                                      thickness: SnakeLayout.thickness)
-            let target = layout.stop(forProgress: Streak.progress(streak))
-            ZStack(alignment: .topLeading) {
-                let pieces = layout.pieces(atStop: shown)
-                ForEach(pieces.indices, id: \.self) { index in
-                    SnakePiece(piece: pieces[index], scale: layout.scale)
+            let target = Double(layout.stop(forProgress: Streak.progress(streak))) / Double(layout.lastStop)
+            SnakeBody(width: geo.size.width, height: geo.size.height, shown: shown)
+                // initial: true fills the saved streak in at launch, as the old outline did.
+                .onChange(of: target, initial: true) { _, new in
+                    withAnimation(.easeInOut(duration: new < shown ? 0.35 : 0.9)) { shown = new }
                 }
-            }
-            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
-            // Starts at the tail and head alone, so the saved streak fills in at launch as the
-            // outline it replaces did. A rotation changes the stops, hence the size in the id.
-            .task(id: Grow(target: target, width: geo.size.width, height: geo.size.height)) {
-                await grow(to: target, last: layout.lastStop)
-            }
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
@@ -39,24 +32,71 @@ struct StreakOutline: View {
                 .accessibilityValue("\(streak)")
         }
     }
+}
 
-    private struct Grow: Equatable {
-        let target: Int
-        let width: Double
-        let height: Double
+/// The snake at one instant of the animation; SwiftUI calls `body` with each frame's `shown`.
+private struct SnakeBody: View, Animatable {
+    let width: CGFloat
+    let height: CGFloat
+    var shown: Double
+
+    var animatableData: Double {
+        get { shown }
+        set { shown = newValue }
     }
 
-    private func grow(to target: Int, last: Int) async {
-        shown = min(shown, last)
-        let steps = abs(target - shown)
-        guard steps > 0 else { return }
-        let duration = target < shown ? 0.35 : 0.9
-        let pause = Duration.seconds(duration / Double(steps))
-        while shown != target {
-            shown += target > shown ? 1 : -1
-            try? await Task.sleep(for: pause)
-            if Task.isCancelled { return }
+    var body: some View {
+        let layout = SnakeLayout(width: width, height: height, thickness: SnakeLayout.thickness)
+        let neck = layout.distance(atStop: shown * Double(layout.lastStop))
+        // The body ends a little under the head, so no gap shows at the neck.
+        let reveal = min(1, (neck + 20 * layout.scale) / layout.pathLength)
+        ZStack(alignment: .topLeading) {
+            SnakePieces(width: width, height: height)
+                .mask {
+                    CentreLine(edge: layout.edgeOffset, radius: layout.cornerRadius)
+                        .trim(from: 0, to: reveal)
+                        .stroke(style: StrokeStyle(lineWidth: SnakeLayout.thickness * 1.1))
+                }
+            SnakePiece(piece: layout.tail, scale: layout.scale)
+            SnakePiece(piece: layout.head(atDistance: neck), scale: layout.scale)
         }
+        .frame(width: width, height: height, alignment: .topLeading)
+    }
+}
+
+/// The whole body of a full circle, flattened once so that only the mask over it changes per frame.
+private struct SnakePieces: View {
+    let width: CGFloat
+    let height: CGFloat
+
+    var body: some View {
+        let layout = SnakeLayout(width: width, height: height, thickness: SnakeLayout.thickness)
+        ZStack(alignment: .topLeading) {
+            ForEach(layout.body.indices, id: \.self) { index in
+                SnakePiece(piece: layout.body[index], scale: layout.scale)
+            }
+        }
+        .frame(width: width, height: height, alignment: .topLeading)
+        .drawingGroup()
+    }
+}
+
+/// The line the snake's middle follows: from the top centre, clockwise, back to the top centre.
+private struct CentreLine: Shape {
+    let edge: CGFloat
+    let radius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let left = rect.minX + edge, right = rect.maxX - edge
+        let top = rect.minY + edge, bottom = rect.maxY - edge
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: top))
+        path.addArc(tangent1End: CGPoint(x: right, y: top), tangent2End: CGPoint(x: right, y: bottom), radius: radius)
+        path.addArc(tangent1End: CGPoint(x: right, y: bottom), tangent2End: CGPoint(x: left, y: bottom), radius: radius)
+        path.addArc(tangent1End: CGPoint(x: left, y: bottom), tangent2End: CGPoint(x: left, y: top), radius: radius)
+        path.addArc(tangent1End: CGPoint(x: left, y: top), tangent2End: CGPoint(x: right, y: top), radius: radius)
+        path.addLine(to: CGPoint(x: rect.midX, y: top))
+        return path
     }
 }
 

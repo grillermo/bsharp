@@ -17,25 +17,51 @@ import Testing
         }
     }
 
-    @Test(arguments: screens) func theHeadStaysOnScreen(width: Double, height: Double) {
+    /// The head's nose end, from the piece's turn around its top-left corner.
+    static func nose(_ head: SnakeLayout.Piece, _ layout: SnakeLayout) -> (x: Double, y: Double) {
+        let radians = head.rotation * .pi / 180
+        let length = SnakeLayout.headLength * layout.scale
+        return (head.x + cos(radians) * length - sin(radians) * layout.edgeOffset,
+                head.y + sin(radians) * length + cos(radians) * layout.edgeOffset)
+    }
+
+    @Test(arguments: screens) func theHeadStaysOnScreenAllTheWayRound(width: Double, height: Double) {
         let layout = SnakeLayout(width: width, height: height, thickness: SnakeLayout.thickness)
-        for stop in 0...layout.lastStop {
-            let head = layout.pieces(atStop: stop).last!
-            #expect(head.kind == .head)
-            // The nose end of the head, before the piece's own rotation.
-            let radians = head.rotation * .pi / 180
-            let noseX = head.x + cos(radians) * SnakeLayout.headLength * layout.scale
-            let noseY = head.y + sin(radians) * SnakeLayout.headLength * layout.scale
-            #expect(noseX >= -0.01 && noseX <= width + 0.01)
-            #expect(noseY >= -0.01 && noseY <= height + 0.01)
+        for step in 0...2000 {
+            let position = Double(layout.lastStop) * Double(step) / 2000
+            let nose = Self.nose(layout.head(atDistance: layout.distance(atStop: position)), layout)
+            #expect(nose.x >= -0.01 && nose.x <= width + 0.01)
+            #expect(nose.y >= -0.01 && nose.y <= height + 0.01)
         }
+    }
+
+    @Test(arguments: screens) func theHeadMovesWithoutJumps(width: Double, height: Double) {
+        let layout = SnakeLayout(width: width, height: height, thickness: SnakeLayout.thickness)
+        var before = layout.head(atDistance: layout.distance(atStop: 0))
+        let steps = 4000.0
+        for step in 1...Int(steps) {
+            let head = layout.head(atDistance: layout.distance(atStop: Double(layout.lastStop) * Double(step) / steps))
+            var turn = abs(head.rotation - before.rotation).truncatingRemainder(dividingBy: 360)
+            turn = min(turn, 360 - turn)
+            #expect(hypot(head.x - before.x, head.y - before.y) < 8)
+            #expect(turn < 8)
+            before = head
+        }
+    }
+
+    @Test func theHeadRestsFlatAgainstTheEdge() {
+        let layout = SnakeLayout(width: 390, height: 844, thickness: 26)
+        let start = layout.head(atDistance: layout.distance(atStop: 0))
+        #expect(abs(start.x - (195 + 65)) < 0.01 && abs(start.y) < 0.01 && abs(start.rotation) < 0.01)
+        let right = layout.head(atDistance: layout.distance(atStop: 8))
+        #expect(abs(right.x - 390) < 0.01 && abs(right.rotation - 90) < 0.01)
     }
 
     @Test func aFullStreakClosesTheLoopAtTheTail() {
         let layout = SnakeLayout(width: 390, height: 844, thickness: 26)
-        let head = layout.pieces(atStop: layout.stop(forProgress: 1)).last!
+        let head = layout.head(atDistance: layout.distance(atStop: Double(layout.stop(forProgress: 1))))
         #expect(abs(head.x + SnakeLayout.headLength * layout.scale - 195) < 0.01)
-        #expect(head.y == 0)
+        #expect(abs(head.y) < 0.01)
     }
 
     @Test func aStreakPastTheTargetStaysFull() {
