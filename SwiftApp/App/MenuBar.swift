@@ -45,13 +45,14 @@ struct MenuBar: View {
                     if !open { panel = nil }
                 }
             } label: {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: metrics.gearIconSize, weight: .bold))
-                    .foregroundStyle(Theme.ink)
+                // Invisible on purpose: the corner still opens the menu, but there is no gear
+                // on screen to draw a child's taps.
+                Color.clear
                     .frame(width: metrics.gearSize, height: metrics.gearSize)
-                    .background(Circle().fill(.white).shadow(color: .black.opacity(0.15), radius: 5, y: 4))
+                    .contentShape(Rectangle())
             }
             .accessibilityIdentifier("menu-gear")
+            .accessibilityLabel("Settings")
         }
     }
 
