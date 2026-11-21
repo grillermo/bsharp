@@ -114,8 +114,10 @@ public struct Game {
 
     /// Play pressed: returns the chord to sound. Pressed during a reveal, it ends the reveal
     /// at once, so the next chord (or level) is the one that sounds. The flags stay locked
-    /// until the caller reports the chord has finished with `chordFinished()`.
-    public mutating func play() -> String {
+    /// until the caller reports the chord has finished with `chordFinished()`. Pressed again
+    /// before then, it does nothing and returns nil, so the chord always plays to the end.
+    public mutating func play() -> String? {
+        if chordSounding { return nil }
         revealFinished()
         showsPlayHint = false
         awaitingPlay = false

@@ -40,7 +40,7 @@ final class GameModel {
         // Play pressed during a reveal ends it at once, and may level up.
         revealTask?.cancel()
         let level = game.level
-        let chord = game.play()
+        guard let chord = game.play() else { return }
         levelChanged(from: level)
         scheduleUnlock(after: player.play(chord))
         save()

@@ -85,6 +85,15 @@ final class GameTestClock {
         #expect(g.tap("red") == .correct)
     }
 
+    @Test func playDoesNothingUntilTheChordHasSounded() {
+        var g = game()
+        #expect(g.play() == "red")
+        #expect(g.play() == nil, "pressed again while the chord sounds")
+        #expect(g.flagsLocked)
+        g.chordFinished()
+        #expect(g.play() == "red", "the same question, played again")
+    }
+
     @Test func aLevelChangeWhileTheChordSoundsOpensTheFlags() {
         var g = game()
         _ = g.play()
